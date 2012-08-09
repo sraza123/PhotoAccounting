@@ -109,23 +109,23 @@ $files = getImagesInDir('images');
        <ul>
            <li>
                 <label for="jsv_bilag">Bilag</label>
-                <div><input type="text" name="jsv_bilag" id="jsv_bilag" value="1" /></div>
+                <div><input type="text" name="jsv_bilag" id="jsv_bilag" value="1" size="55"/></div>
            </li>
            <li>
                 <label for="jsv_date">Date</label>
-                <div><input type="text" name="jsv_date" id="jsv_date" /></div>
+                <div><input type="text" name="jsv_date" id="jsv_date" size="55"/></div>
            </li>
            <li>
                 <label for="jsv_tekst">Tekst</label>
-                <div><textarea name="jsv_tekst" id="jsv_tekst"></textarea>
+                <div><textarea name="jsv_tekst" id="jsv_tekst" cols="41"></textarea>
            </li>
            <li>
-                <label for="jsv_belob">Belob</label>
-                <div><input type="text" name="jsv_belob" id="jsv_belob" /></div>
+                <label for="jsv_belob">Bel&oslash;b</label>
+                <div><input type="text" name="jsv_belob" id="jsv_belob" size="55"/></div>
            </li>
            <li>
                 <label for="jsv_konto">Konto</label>
-                <div><input type="text" name="jsv_konto" id="jsv_konto" /></div>
+                <div><input type="text" name="jsv_konto" id="jsv_konto" size="55"/></div>
            </li>
        </ul>
    </form>
