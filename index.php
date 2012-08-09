@@ -2,7 +2,7 @@
 
 /** COPYRIGHT Time at Task Aps*/
 
-/* Post-Cache means images to be kept in memory after having been viewed (so one can quickly go backwards in the image gallery.
+/** Post-Cache means images to be kept in memory after having been viewed (so one can quickly go backwards in the image gallery.*/
 define("POST_CACHE", 10);
 define("PRE_CACHE", 20);
 
