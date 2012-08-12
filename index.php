@@ -113,7 +113,7 @@ $files = getImagesInDir('images');
    		$('jsv_konto').value = valas;
    		
    		//comment out the next line if you want the cursor to stay in the field.
-   		//$('jsv_konto').blur();
+   		$('jsv_konto').blur();
    		}
    	}
    
