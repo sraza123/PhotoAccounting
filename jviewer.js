@@ -2,6 +2,8 @@
 JSViewer = function(){
 
     // Globals
+    
+     var my_key_codes;
      var cached_count = 0;
      var cache_group = 1;
      var image_index = 0; // keep track of image being cached
@@ -143,12 +145,17 @@ JSViewer = function(){
      var keyUpHandler = function(Y,total_number_images,POST_CACHE, PRE_CACHE){
          return function(e) {
               e.preventDefault();
-	      switch(e.keyCode){
+              var valas = my_codes[String.fromCharCode(e.keyCode).toLowerCase()];
+              if(valas != undefined) {
+              	current_image_index++;
+              	renderImage(Y,total_number_images,localStorage.getItem('img-'+current_image_index));
+              }
+	      /*switch(e.keyCode){
 	      case 65:
 		current_image_index++;
 		renderImage(Y,total_number_images,localStorage.getItem('img-'+current_image_index));
 	        break;
-	      }
+	      }*/
           }
       }
 
@@ -162,8 +169,8 @@ JSViewer = function(){
       * @return {null} 
       */
      var setKeyboardHandlers = function(Y, total_number_images,POST_CACHE, PRE_CACHE){
-	 Y.one('doc').on("key", keyDownHandler(Y,total_number_images, POST_CACHE, PRE_CACHE), 'down:65,enter,81,87');
-	 Y.one('doc').on("key", keyUpHandler(Y,total_number_images, POST_CACHE, PRE_CACHE), 'up:65');
+	 Y.one('doc').on("key", keyDownHandler(Y,total_number_images, POST_CACHE, PRE_CACHE), 'enter,81,87');
+	 Y.one('doc').on("keyup", keyUpHandler(Y,total_number_images, POST_CACHE, PRE_CACHE));
      }
 
      /**
@@ -336,7 +343,9 @@ JSViewer = function(){
             * @param {PRE_CACHE} this is the number of images to cached at a time
             * @return {null} 
             */
-           start : function(total_number_images, POST_CACHE, PRE_CACHE, from){
+           start : function(total_number_images, POST_CACHE, PRE_CACHE, from,key_codes){
+           
+           my_key_codes = key_codes;
 
               YUI().use("io", "dump", "json-parse", 'node', 'event', 'transition', 'node-load', 'anim',  function (Y) {
 		    /*
