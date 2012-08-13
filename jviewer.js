@@ -172,6 +172,8 @@ JSViewer = function () {
             if (valas != undefined) {
                 current_pressed_keys--;
                 if(current_pressed_keys == 0) {
+                    $('jsv_konto').value = valas;
+                    $('jsv_konto').blur();
                     current_image_index++;
                     renderImage(Y, total_number_images, localStorage.getItem('img-' + current_image_index));
                 }
