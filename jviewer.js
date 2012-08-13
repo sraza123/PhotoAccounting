@@ -14,7 +14,6 @@ JSViewer = function () {
     cache_group = 1;
     image_index = 0; // keep track of image being cached
     current_image_index = 0; // keep track of the current image being viewed
-    current_pressed_keys = 0;
 
     /**
      * Creates a shortcut for document.getElementById
@@ -132,15 +131,6 @@ JSViewer = function () {
     keyDownHandler = function (Y, total_number_images, POST_CACHE, PRE_CACHE) {
         return function (e) {
             e.preventDefault();
-            
-            var valas = my_key_codes[String.fromCharCode(e.keyCode).toLowerCase()];
-            if(valas != undefined) {
-                $('jsv_konto').value = valas;
-                //comment out the next line if you want the cursor to stay in the field.
-                $('jsv_konto').blur();
-                current_pressed_keys++;
-            
-            }
 
             switch (e.keyCode) {
             case 13: // enter
@@ -167,14 +157,11 @@ JSViewer = function () {
         return function (e) {
             e.preventDefault();
 
-            var valas = my_key_codes[String.fromCharCode(e.keyCode).toLowerCase()];
+            var valas = my_codes[String.fromCharCode(e.keyCode).toLowerCase()];
 
             if (valas != undefined) {
-                current_pressed_keys--;
-                if(current_pressed_keys == 0) {
-                    current_image_index++;
-                    renderImage(Y, total_number_images, localStorage.getItem('img-' + current_image_index));
-                }
+                current_image_index++;
+                renderImage(Y, total_number_images, localStorage.getItem('img-' + current_image_index));
             }
 
             /*switch (e.keyCode) {
@@ -196,7 +183,7 @@ JSViewer = function () {
      * @return {null} 
      */
     setKeyboardHandlers = function (Y, total_number_images, POST_CACHE, PRE_CACHE) {
-        Y.one('doc').on("keydown", keyDownHandler(Y, total_number_images, POST_CACHE, PRE_CACHE));
+        Y.one('doc').on("key", keyDownHandler(Y, total_number_images, POST_CACHE, PRE_CACHE), 'enter,81,87');
         Y.one('doc').on("keyup", keyUpHandler(Y, total_number_images, POST_CACHE, PRE_CACHE));
     };
 
