@@ -107,6 +107,16 @@ $files = getImagesInDir('images');
    	my_codes['b'] = 'bbbb';
    	my_codes['x'] = 'xxxx';
    
+   	document.onkeydown=function(e){
+   		var valas = my_codes[String.fromCharCode(e.which).toLowerCase()];
+   		if(valas != undefined) {
+   		$('jsv_konto').value = valas;
+   		
+   		//comment out the next line if you want the cursor to stay in the field.
+   		$('jsv_konto').blur();
+   		}
+   	}
+   
   JSViewer.start(<?php echo count($files); ?>, <?php echo POST_CACHE; ?>, <?php echo PRE_CACHE; ?>, <?php echo isset($_GET['imageID'])?$_GET['imageID']:1; ?>,my_codes);
   
 
