@@ -3,8 +3,8 @@
 /** COPYRIGHT Time at Task Aps*/
 
 /** Post-Cache means images to be kept in memory after having been viewed (so one can quickly go backwards in the image gallery.*/
-define("POST_CACHE", 1);
-define("PRE_CACHE", 2);
+define("POST_CACHE", 2);
+define("PRE_CACHE", 5);
 
 function base64_encode_image ($imagefile) {
   $imgtype = array('jpg', 'jpeg', 'gif', 'png');

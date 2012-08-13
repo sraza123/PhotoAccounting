@@ -79,11 +79,16 @@ JSViewer = function () {
             }
 
             current_image_index--;
+            log(current_image_index);
             if (current_image_index >= 0) {
-                if (localStorage.getItem('img-' + current_image_index)) {
-                    renderImage(Y, total_number_images, localStorage.getItem('img-' + current_image_index));
-                } else {
-                    log("No more images");
+                if (!localStorage.getItem('img-' + current_image_index)) {
+                    cacheGroup(Y, current_image_index, total_number_images, POST_CACHE, PRE_CACHE);
+                }
+
+                try {
+                  renderImage(Y, total_number_images, localStorage.getItem('img-' + current_image_index));
+                } catch(e) {
+                  log(e)
                 }
             }
         };
@@ -103,19 +108,22 @@ JSViewer = function () {
             if (e) {
                 e.stopPropagation();
             }
+            current_image_index++;
+            log(current_image_index);
+
+            renderImage(Y, total_number_images, localStorage.getItem('img-' + current_image_index));
 
             // Check if we need to preload some more images
-            if ((current_image_index + 1) % POST_CACHE == 0) {
+            if ((current_image_index + 2) % PRE_CACHE === 0) {
                 cache_group++;
                 // Cache the next group of images
                 if (PRE_CACHE * (cache_group - 1) < total_number_images) {
                     cacheGroup(Y, PRE_CACHE * (cache_group - 1), total_number_images, POST_CACHE, PRE_CACHE);
                 }
             }
-            if (localStorage.getItem('img-' + (current_image_index + 1))) {
-                current_image_index++;
-                renderImage(Y, total_number_images, localStorage.getItem('img-' + current_image_index));
-            }
+
+            
+            
         };
     };
 
@@ -194,6 +202,7 @@ JSViewer = function () {
      */
     getImageDataFailure = function () {
         return function (x, o) {
+
         };
     };
 
@@ -261,44 +270,40 @@ JSViewer = function () {
      */
     getImageDataSuccess = function (Y, imageID, total_number_images, POST_CACHE, PRE_CACHE, isFirst) {
         return function (x, o) {
+            localStorage.setItem('img-' + imageID, o.responseText);
+            cached_count++;
+
             /*
               Once we have the image data we save it to local storage, and if we have finished caching 
               the first group of images, we render the first image on the screen.
             */
-            try {
+            if (!$('jsv_image')) {
+                $('log').innerHTML = "";
+            }
+
+            if (isFirst) {
                 if (!$('jsv_image')) {
-                    $('log').innerHTML = "";
+                    var image_link, first_image;
+                    image_link = $a({
+                        'style': 'position:relative;text-decoration:none;',
+                        'id': 'jsv_link',
+                        'href': '?imageID=' + imageID
+                    });
+
+                    first_image = $img({
+                        'id': 'jsv_image',
+                        'src': 'data:image/png;base64,' + o.responseText
+                    });
+
+                    image_link.appendChild(first_image);
+
+                    $('jsv_left').appendChild(image_link);
+
+                    addArrows(Y, total_number_images, POST_CACHE, PRE_CACHE);
+                    setKeyboardHandlers(Y, total_number_images, POST_CACHE, PRE_CACHE);
                 }
 
-                if (isFirst) {
-                    if (!$('jsv_image')) {
-                        var image_link, first_image;
-                        image_link = $a({
-                            'style': 'position:relative;text-decoration:none;',
-                            'id': 'jsv_link',
-                            'href': '?imageID=' + imageID
-                        });
-
-                        first_image = $img({
-                            'id': 'jsv_image',
-                            'src': 'data:image/png;base64,' + o.responseText
-                        });
-
-                        image_link.appendChild(first_image);
-
-                        $('jsv_left').appendChild(image_link);
-
-                        addArrows(Y, total_number_images, POST_CACHE, PRE_CACHE);
-                        setKeyboardHandlers(Y, total_number_images, POST_CACHE, PRE_CACHE);
-                    }
-
-                    $('log').innerHTML = "";
-                }
-
-                localStorage.setItem('img-' + imageID, o.responseText);
-                cached_count++;
-            } catch (e) {
-                log(e + 'imageID=' + imageID);
+                $('log').innerHTML = "";
             }
         };
     };
@@ -314,15 +319,16 @@ JSViewer = function () {
      * @return {null} 
      */
     loadImageToLocalStorage = function (Y, imageID, total_number_images, POST_CACHE, PRE_CACHE, isFirst) {
-          /*
-           This get the images data for an image from the server
-           and if successful, saves it to local storage
-         */
+        /*
+        This get the images data for an image from the server
+        and if successful, saves it to local storage
+        */
         var cfg = {
             on : {
                 success : getImageDataSuccess(Y, imageID, total_number_images, POST_CACHE, PRE_CACHE, isFirst),
                 failure : getImageDataFailure()
-            }
+            },
+            sync: true
         };
 
         Y.io("?imageID=" + imageID + '&data=1&imageonly=1', cfg);
@@ -339,11 +345,18 @@ JSViewer = function () {
      * @return {null} 
      */
     cacheGroup = function (Y, from, total_number_images, POST_CACHE, PRE_CACHE) {
-        var i = 0;
+        var i = 0, n;
         cached_count = 0;
         /*
         We get the image data for each image from the server and save it to local storage
         */
+
+        if (from > 0) {
+            loadImageToLocalStorage(Y, from - 1, total_number_images, POST_CACHE, PRE_CACHE, i == 0);
+            for (n = from - 2; n > 0; n--) {
+              localStorage.removeItem('img-' + n);
+            }
+        }
         for (i = 0; i < PRE_CACHE; i++) {
             loadImageToLocalStorage(Y, from + i, total_number_images, POST_CACHE, PRE_CACHE, i == 0);
         }
@@ -398,14 +411,12 @@ JSViewer = function () {
                 current_image_index = from - 1;
                 $('jsv_bilag').value = String(current_image_index + 1);
                 cacheGroup(Y, current_image_index, total_number_images, POST_CACHE, PRE_CACHE);
-
-                // If we're not starting from the beginning, then we also need to cache the previous images
-                if (current_image_index > 0) {
-                    cachePreviousGroup(Y, current_image_index, total_number_images, POST_CACHE, PRE_CACHE);
-                }
-
             });
-        }
+        },
+        current_image_index:  function() { return current_image_index; },
+        cached_count:  function() { return cached_count; },
+        cache_group: function() { return cache_group; },
+        image_index: function() { return image_index; }
 
     };
 
