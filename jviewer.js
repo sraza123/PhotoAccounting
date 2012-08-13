@@ -1,4 +1,4 @@
-/*jslint  browser: true, indent: 4, plusplus: true */
+/*jslint  browser: true, indent: 4, plusplus: true, eqeq: true, */
 /** COPYRIGHT Time at Task */
 JSViewer = function () {
 
@@ -45,7 +45,7 @@ JSViewer = function () {
              then focus on the konto field
            */
             $('jsv_image').src = 'data:image/png;base64,' + image_data;
-            $('jsv_bilag').value = current_image_index * 1 + 1 + '';
+            $('jsv_bilag').value = String(current_image_index + 1);
             $('jsv_konto').focus();
             $('jsv_link').href = '?imageID=' + (current_image_index + 1) + '&imageonly=1';
 
@@ -112,7 +112,7 @@ JSViewer = function () {
                     cacheGroup(Y, PRE_CACHE * (cache_group - 1), total_number_images, POST_CACHE, PRE_CACHE);
                 }
             }
-            if (localStorage.getItem('img-' + (current_image_index * 1 + 1))) {
+            if (localStorage.getItem('img-' + (current_image_index + 1))) {
                 current_image_index++;
                 renderImage(Y, total_number_images, localStorage.getItem('img-' + current_image_index));
             }
@@ -136,10 +136,10 @@ JSViewer = function () {
             case 13: // enter
             case 87: // w (next)
                 showNextImage(Y, total_number_images, POST_CACHE, PRE_CACHE)(e);
-              break;
+                break;
             case 81: //q (previous)
                 showPrevImage(Y, total_number_images, POST_CACHE, PRE_CACHE)(e);
-              break;
+                break;
             }
         };
     };
@@ -155,20 +155,23 @@ JSViewer = function () {
      */
     keyUpHandler = function (Y, total_number_images, POST_CACHE, PRE_CACHE) {
         return function (e) {
-              e.preventDefault();
-              var valas = my_codes[String.fromCharCode(e.keyCode).toLowerCase()];
-              if (valas != undefined) {
-                  current_image_index++;
-                  renderImage(Y, total_number_images,localStorage.getItem('img-' + current_image_index));
-              }
-              /*switch (e.keyCode) {
-              case 65:
+            e.preventDefault();
+
+            var valas = my_codes[String.fromCharCode(e.keyCode).toLowerCase()];
+
+            if (valas != undefined) {
                 current_image_index++;
-                renderImage(Y, total_number_images,localStorage.getItem('img-' + current_image_index));
-                break;
-              }*/
-          };
-      };
+                renderImage(Y, total_number_images, localStorage.getItem('img-' + current_image_index));
+            }
+
+            /*switch (e.keyCode) {
+            case 65:
+              current_image_index++;
+              renderImage(Y, total_number_images, localStorage.getItem('img-' + current_image_index));
+              break;
+            }*/
+        };
+    };
 
     /**
      * Initialize the keyboard handlers
@@ -179,20 +182,20 @@ JSViewer = function () {
      * @param {PRE_CACHE} this is the number of images to cached at a time
      * @return {null} 
      */
-     setKeyboardHandlers = function (Y, total_number_images, POST_CACHE, PRE_CACHE) {
-         Y.one('doc').on("key", keyDownHandler(Y, total_number_images, POST_CACHE, PRE_CACHE), 'enter,81,87');
-         Y.one('doc').on("keyup", keyUpHandler(Y, total_number_images, POST_CACHE, PRE_CACHE));
-     };
+    setKeyboardHandlers = function (Y, total_number_images, POST_CACHE, PRE_CACHE) {
+        Y.one('doc').on("key", keyDownHandler(Y, total_number_images, POST_CACHE, PRE_CACHE), 'enter,81,87');
+        Y.one('doc').on("keyup", keyUpHandler(Y, total_number_images, POST_CACHE, PRE_CACHE));
+    };
 
     /**
      * Handles connection error when trying to get image data from the server
      *
      * @return {function} 
      */
-     getImageDataFailure = function () {
-         return function (x,o) {
+    getImageDataFailure = function () {
+         return function (x, o) {
          };
-     };
+    };
 
     /**
      * Handles hiding and showing of arrows
@@ -201,12 +204,12 @@ JSViewer = function () {
      * @param {show} if true, show the arrow, otherwise, hide them
      * @return {null} 
      */
-      toggleArrows = function (Y, show) {
+    toggleArrows = function (Y, show) {
          return function (e) {
              Y.one('#arrow_left').setStyle('display', (show ? 'inline' : 'none'));
              Y.one('#arrow_right').setStyle('display', (show ? 'inline' : 'none'));
          };
-     };
+    };
 
     /**
      * Add navigation arrows to the image
@@ -243,12 +246,12 @@ JSViewer = function () {
      * @param {PRE_CACHE} this is the number of images to cached at a time
      * @return {function} 
      */
-     getImageDataSuccess = function (Y,imageID,total_number_images, POST_CACHE, PRE_CACHE, isFirst) {
-         return function (x,o) {
-          /*
-            Once we have the image data we save it to local storage, and if we have finished caching 
-            the first group of images, we render the first image on the screen.
-         */
+    getImageDataSuccess = function (Y,imageID,total_number_images, POST_CACHE, PRE_CACHE, isFirst) {
+         return function (x, o) {
+            /*
+              Once we have the image data we save it to local storage, and if we have finished caching 
+              the first group of images, we render the first image on the screen.
+            */
              try {
                  if (!$('jsv_image')) {
                      $('log').innerHTML = "";
@@ -273,7 +276,7 @@ JSViewer = function () {
                 log(e+ 'imageID='+ imageID);
             }
         }
-    }
+    };
 
     /**
      * Use ajax to get the image data
@@ -367,7 +370,7 @@ JSViewer = function () {
                       We cache PRE_CACHE number of images at a time, starting from the first image
                    */
                     current_image_index = from - 1;
-                       $('jsv_bilag').value = current_image_index * 1 + 1 + '';
+                    $('jsv_bilag').value = String(current_image_index + 1);
                     cacheGroup(Y, current_image_index, total_number_images, POST_CACHE, PRE_CACHE);
 
                     // If we're not starting from the beginning, then we also need to cache the previous images
