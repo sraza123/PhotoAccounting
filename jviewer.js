@@ -1,41 +1,48 @@
+/*jslint  browser: true, indent: 4 */
 /** COPYRIGHT Time at Task */
 JSViewer = function () {
 
+    "use strict";
+
     // Globals
-    var my_key_codes;
-    var cached_count = 0;
-    var cache_group = 1;
-    var image_index = 0; // keep track of image being cached
-    var current_image_index = 0; // keep track of the current image being viewed
+    var my_key_codes, cached_count, cache_group, image_index, current_image_index, $,
+    $, renderImage, showPrevImage, showNextImage, keyDownHandler, keyUpHandler,
+    setKeyboardHandlers, getImageDataFailure, toggleArrows, addArrows, getImageDataSuccess,
+    loadImageToLocalStorage, cacheGroup, cachePreviousGroup;
 
-     /**
-      * Creates a shortcut for document.getElementById
-      *
-      * @param {id} the did of the element we want to get
-      * @return {html object} The html object element
-      */
-     var $ = function (id) {
-         return document.getElementById(id);
-     }
+    cached_count = 0;
+    cache_group = 1;
+    image_index = 0; // keep track of image being cached
+    current_image_index = 0; // keep track of the current image being viewed
 
-     /**
-      * Renders an image on the screen
-      *
-      * @param {Y} Yui3 object
-      * @param {total_number_images} the total number of images
-      * @return {null} 
-      */
-     var renderImage = function (Y, total_number_images, image_data) {
-         if (current_image_index > total_number_images-1) {
-             current_image_index = total_number_images-1;
-         }
-         else if (current_image_index < 0) {
-             current_image_index = 0;
-         }
-         else if (!localStorage.getItem('img-'+current_image_index)) {
-             current_image_index--;
-         }
-         else {
+    /**
+     * Creates a shortcut for document.getElementById
+     *
+     * @param {id} the did of the element we want to get
+     * @return {html object} The html object element
+     */
+    $ = function (id) {
+        return document.getElementById(id);
+    }
+
+    /**
+     * Renders an image on the screen
+     *
+     * @param {Y} Yui3 object
+     * @param {total_number_images} the total number of images
+     * @return {null} 
+     */
+    renderImage = function (Y, total_number_images, image_data) {
+        if (current_image_index > total_number_images-1) {
+            current_image_index = total_number_images-1;
+        }
+        else if (current_image_index < 0) {
+            current_image_index = 0;
+        }
+        else if (!localStorage.getItem('img-'+current_image_index)) {
+            current_image_index--;
+        }
+        else {
              /*
                This sets the image src to the image data and reposition the image arrows,
                then focus on the konto field
@@ -61,7 +68,7 @@ JSViewer = function () {
       * @param {PRE_CACHE} this is the number of images to cached at a time
       * @return {null} 
       */
-     var showPrevImage = function (Y,total_number_images,POST_CACHE, PRE_CACHE) {
+     showPrevImage = function (Y,total_number_images,POST_CACHE, PRE_CACHE) {
          return function (e) {
              if (e) {
                    e.stopPropagation();
@@ -88,7 +95,7 @@ JSViewer = function () {
       * @param {PRE_CACHE} this is the number of images to cached at a time
       * @return {null} 
       */
-     var showNextImage = function (Y,total_number_images,POST_CACHE, PRE_CACHE) {
+     showNextImage = function (Y,total_number_images,POST_CACHE, PRE_CACHE) {
          return function (e) {
                  if (e) {
                       e.stopPropagation();
@@ -117,7 +124,7 @@ JSViewer = function () {
       * @param {PRE_CACHE} this is the number of images to cached at a time
       * @return {null} 
       */
-     var keyDownHandler = function (Y,total_number_images,POST_CACHE, PRE_CACHE) {
+     keyDownHandler = function (Y,total_number_images,POST_CACHE, PRE_CACHE) {
           return function (e) {
               e.preventDefault();
               switch(e.keyCode) {
@@ -141,7 +148,7 @@ JSViewer = function () {
       * @param {PRE_CACHE} this is the number of images to cached at a time
       * @return {null} 
       */
-     var keyUpHandler = function (Y,total_number_images,POST_CACHE, PRE_CACHE) {
+     keyUpHandler = function (Y,total_number_images,POST_CACHE, PRE_CACHE) {
          return function (e) {
               e.preventDefault();
               var valas = my_codes[String.fromCharCode(e.keyCode).toLowerCase()];
@@ -167,7 +174,7 @@ JSViewer = function () {
       * @param {PRE_CACHE} this is the number of images to cached at a time
       * @return {null} 
       */
-     var setKeyboardHandlers = function (Y, total_number_images,POST_CACHE, PRE_CACHE) {
+     setKeyboardHandlers = function (Y, total_number_images,POST_CACHE, PRE_CACHE) {
          Y.one('doc').on("key", keyDownHandler(Y,total_number_images, POST_CACHE, PRE_CACHE), 'enter,81,87');
          Y.one('doc').on("keyup", keyUpHandler(Y,total_number_images, POST_CACHE, PRE_CACHE));
      }
@@ -177,7 +184,7 @@ JSViewer = function () {
       *
       * @return {function} 
       */
-     var getImageDataFailure = function () {
+     getImageDataFailure = function () {
          return function (x,o) {
          }
      }
@@ -189,7 +196,7 @@ JSViewer = function () {
       * @param {show} if true, show the arrow, otherwise, hide them
       * @return {null} 
       */
-      var toggleArrows = function (Y, show) {
+      toggleArrows = function (Y, show) {
          return function (e) {
              Y.one('#arrow_left').setStyle('display', (show?'inline':'none'));
              Y.one('#arrow_right').setStyle('display', (show?'inline':'none'));
@@ -204,7 +211,7 @@ JSViewer = function () {
       * @param {PRE_CACHE} this is the number of images to cached at a time
       * @return {null} 
       */
-     var addArrows = function (Y,total_number_images,POST_CACHE, PRE_CACHE) {
+     addArrows = function (Y,total_number_images,POST_CACHE, PRE_CACHE) {
          var pos_top = Y.one('#jsv_image').get('height')-200;
          pos_top+='px';
          var arrowLeft = $a({'id':'arrow_left','href':'#', 'style': 'display:none;text-decoration: none !important; font-weight: bold; font-size: 70px; color: #CC0000;position:absolute;bottom:'+pos_top+';left:0;z-index:9999999'}, '<');
@@ -231,7 +238,7 @@ JSViewer = function () {
       * @param {PRE_CACHE} this is the number of images to cached at a time
       * @return {function} 
       */
-     var getImageDataSuccess = function (Y,imageID,total_number_images, POST_CACHE, PRE_CACHE, isFirst) {
+     getImageDataSuccess = function (Y,imageID,total_number_images, POST_CACHE, PRE_CACHE, isFirst) {
          return function (x,o) {
           /*
             Once we have the image data we save it to local storage, and if we have finished caching 
@@ -274,7 +281,7 @@ JSViewer = function () {
       * @param {PRE_CACHE} this is the number of images to cached at a time
       * @return {null} 
       */
-     var loadImageToLocalStorage = function (Y,imageID,total_number_images,POST_CACHE, PRE_CACHE, isFirst) {
+     loadImageToLocalStorage = function (Y,imageID,total_number_images,POST_CACHE, PRE_CACHE, isFirst) {
           /*
            This get the images data for an image from the server
            and if successful, saves it to local storage
@@ -298,7 +305,7 @@ JSViewer = function () {
       * @param {PRE_CACHE} this is the number of images to cached at a time
       * @return {null} 
       */
-     var cacheGroup = function (Y, from, total_number_images, POST_CACHE, PRE_CACHE) {
+     cacheGroup = function (Y, from, total_number_images, POST_CACHE, PRE_CACHE) {
           var i = 0;
           cached_count = 0;
           /*
@@ -319,7 +326,7 @@ JSViewer = function () {
       * @param {PRE_CACHE} this is the number of images to cached at a time
       * @return {null} 
       */
-     var cachePreviousGroup = function (Y, from, total_number_images, POST_CACHE, PRE_CACHE) {
+     cachePreviousGroup = function (Y, from, total_number_images, POST_CACHE, PRE_CACHE) {
           var i = 0;
           cached_count = 0;
           /*
@@ -330,7 +337,7 @@ JSViewer = function () {
           }
       }
        
-       return{
+       return {
 
             /**
             * Initializes the Yui3 object and gets things rolling,.
@@ -371,6 +378,3 @@ JSViewer = function () {
        }
 
 }();
-
-
-
