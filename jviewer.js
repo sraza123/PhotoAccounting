@@ -5,10 +5,10 @@ JSViewer = function () {
     "use strict";
 
     // Globals
-    var my_key_codes, cached_count, cache_group, image_index, current_image_index, $,
-    $, renderImage, showPrevImage, showNextImage, keyDownHandler, keyUpHandler,
-    setKeyboardHandlers, getImageDataFailure, toggleArrows, addArrows, getImageDataSuccess,
-    loadImageToLocalStorage, cacheGroup, cachePreviousGroup;
+    var my_key_codes, cached_count, cache_group, image_index, current_image_index,
+        $, renderImage, showPrevImage, showNextImage, keyDownHandler, keyUpHandler,
+        setKeyboardHandlers, getImageDataFailure, toggleArrows, addArrows, getImageDataSuccess,
+        loadImageToLocalStorage, cacheGroup, cachePreviousGroup;
 
     cached_count = 0;
     cache_group = 1;
@@ -23,7 +23,7 @@ JSViewer = function () {
      */
     $ = function (id) {
         return document.getElementById(id);
-    }
+    };
 
     /**
      * Renders an image on the screen
@@ -33,31 +33,29 @@ JSViewer = function () {
      * @return {null} 
      */
     renderImage = function (Y, total_number_images, image_data) {
-        if (current_image_index > total_number_images-1) {
-            current_image_index = total_number_images-1;
-        }
-        else if (current_image_index < 0) {
+        if (current_image_index > total_number_images - 1) {
+            current_image_index = total_number_images - 1;
+        } else if (current_image_index < 0) {
             current_image_index = 0;
-        }
-        else if (!localStorage.getItem('img-'+current_image_index)) {
+        } else if (!localStorage.getItem('img-' + current_image_index)) {
             current_image_index--;
-        }
-        else {
-             /*
-               This sets the image src to the image data and reposition the image arrows,
-               then focus on the konto field
-             */
-              $('jsv_image').src='data:image/png;base64,' +image_data;
-              $('jsv_bilag').value = current_image_index*1+1+'';
-              $('jsv_konto').focus();
-              $('jsv_link').href = '?imageID='+(current_image_index+1)+'&imageonly=1';
-              var pos_top = Y.one('#jsv_image').get('height')-200;
-              pos_top+='px';
-              Y.one('#arrow_left').setStyle('bottom',pos_top);
-              Y.one('#arrow_right').setStyle('bottom',pos_top);
+        } else {
+            /*
+             This sets the image src to the image data and reposition the image arrows,
+             then focus on the konto field
+            */
+            $('jsv_image').src = 'data:image/png;base64,' + image_data;
+            $('jsv_bilag').value = current_image_index * 1 + 1 + '';
+            $('jsv_konto').focus();
+            $('jsv_link').href = '?imageID='+(current_image_index+1)+'&imageonly=1';
+             
+            var pos_top = Y.one('#jsv_image').get('height') - 200;
 
+            pos_top += 'px';
+            Y.one('#arrow_left').setStyle('bottom',pos_top);
+            Y.one('#arrow_right').setStyle('bottom',pos_top);
          }
-     }
+     };
 
      /**
       * Renders the previous image on the screen
@@ -76,15 +74,15 @@ JSViewer = function () {
 
              current_image_index--;
              if (current_image_index>=0) {
-                if (localStorage.getItem('img-'+current_image_index)) {
-                    renderImage(Y,total_number_images, localStorage.getItem('img-'+current_image_index));
+                if (localStorage.getItem('img-' + current_image_index)) {
+                    renderImage(Y,total_number_images, localStorage.getItem('img-' + current_image_index));
                 }
                 else {
                     // alert("No more images");
                 }
              }
          }
-     }
+     };
 
      /**
       * Renders the next image on the screen
@@ -104,16 +102,16 @@ JSViewer = function () {
                   if ((current_image_index+1) % POST_CACHE == 0) {
                       cache_group++;
                       // Cache the next group of images
-                      if (PRE_CACHE*(cache_group-1)<total_number_images) {
-                          cacheGroup(Y, PRE_CACHE*(cache_group-1), total_number_images, POST_CACHE, PRE_CACHE);
+                      if (PRE_CACHE*(cache_group - 1)<total_number_images) {
+                          cacheGroup(Y, PRE_CACHE*(cache_group - 1), total_number_images, POST_CACHE, PRE_CACHE);
                       }
                   }
-                 if (localStorage.getItem('img-'+(current_image_index*1+1))) {
+                 if (localStorage.getItem('img-'+(current_image_index * 1 + 1))) {
                      current_image_index++;
-                      renderImage(Y,total_number_images,localStorage.getItem('img-'+current_image_index));
+                      renderImage(Y,total_number_images,localStorage.getItem('img-' + current_image_index));
                 }
          }
-     }
+     };
 
      /**
       * Handles a keydown press
@@ -137,7 +135,7 @@ JSViewer = function () {
                 break;
               }
           }
-      }
+      };
 
      /**
       * Handles a keyup event
@@ -154,12 +152,12 @@ JSViewer = function () {
               var valas = my_codes[String.fromCharCode(e.keyCode).toLowerCase()];
               if (valas != undefined) {
                       current_image_index++;
-                      renderImage(Y,total_number_images,localStorage.getItem('img-'+current_image_index));
+                      renderImage(Y,total_number_images,localStorage.getItem('img-' + current_image_index));
               }
               /*switch(e.keyCode) {
               case 65:
                 current_image_index++;
-                renderImage(Y,total_number_images,localStorage.getItem('img-'+current_image_index));
+                renderImage(Y,total_number_images,localStorage.getItem('img-' + current_image_index));
                 break;
               }*/
           }
@@ -250,7 +248,7 @@ JSViewer = function () {
                  }
                  if (isFirst) {
                      if (!$('jsv_image')) {
-                        var image_link = $a({'style':'position:relative;text-decoration:none;','id':'jsv_link','href':'?imageID='+imageID});
+                        var image_link = $a({'style':'position:relative;text-decoration:none;','id':'jsv_link','href':'?imageID='+ imageID});
                         var first_image = $img({'id':'jsv_image','src':'data:image/png;base64,' +o.responseText});
                         image_link.appendChild(first_image);
                              $('jsv_left').appendChild(image_link);
@@ -262,11 +260,11 @@ JSViewer = function () {
                      }
                      $('log').innerHTML = "";
                  }
-                     localStorage.setItem('img-'+imageID+'', o.responseText);
+                     localStorage.setItem('img-'+ imageID+'', o.responseText);
                  cached_count++;
                   } 
              catch (e) {
-                 alert(e+ 'imageID='+imageID);
+                 alert(e+ 'imageID='+ imageID);
              }
          }
      }
@@ -292,7 +290,7 @@ JSViewer = function () {
                   failure : getImageDataFailure()
                }
           }
-          Y.io("?imageID="+imageID+'&data=1&imageonly=1', cfg);
+          Y.io("?imageID="+ imageID+'&data=1&imageonly=1', cfg);
       }
 
      /**
@@ -312,7 +310,7 @@ JSViewer = function () {
           We get the image data for each image from the server and save it to local storage
           */
           for(i=0;i<PRE_CACHE;i++) {
-              loadImageToLocalStorage(Y,from+i,total_number_images,POST_CACHE, PRE_CACHE, i==0);
+              loadImageToLocalStorage(Y,from+ i,total_number_images,POST_CACHE, PRE_CACHE, i==0);
           }
       }
 
@@ -362,8 +360,8 @@ JSViewer = function () {
                     /*
                       We cache PRE_CACHE number of images at a time, starting from the first image
                     */
-                    current_image_index = from-1;
-                       $('jsv_bilag').value = current_image_index*1+1+'';
+                    current_image_index = from - 1;
+                       $('jsv_bilag').value = current_image_index * 1 + 1 + '';
                     cacheGroup(Y, current_image_index, total_number_images, POST_CACHE, PRE_CACHE);
 
                     // If we're not starting from the beginning, then we also need to cache the previous images
