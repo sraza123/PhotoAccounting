@@ -3,71 +3,59 @@
 /** COPYRIGHT Time at Task Aps*/
 
 /** Post-Cache means images to be kept in memory after having been viewed (so one can quickly go backwards in the image gallery.*/
-define("POST_CACHE", 1);
-define("PRE_CACHE", 2);
+define("POST_CACHE", 2);
+define("PRE_CACHE", 5);
 
-function base64_encode_image ($imagefile) {
-  $imgtype = array('jpg', 'jpeg', 'gif', 'png');
-  $filename = file_exists($imagefile) ? htmlentities($imagefile) : die('Image file name does not exist');
-  $filetype = pathinfo($filename, PATHINFO_EXTENSION);
-  if (in_array($filetype, $imgtype)){
-    $imgbinary = fread(fopen($filename, "r"), filesize($filename));
-  } 
-  else {
-    die ('Invalid image type, jpg, gif, and png is only allowed');
-  }
-  //  return 'data:image/' . $filetype . ';base64,' . base64_encode($imgbinary);
-   return base64_encode($imgbinary);
-}
 
-     /**
-     * Iterates over a directory and returns file objects.
-     *
-     * @param string $dir
-     * @param mixed $filter
-     * @param bool $recursive defaults to false
-     * @param bool $addDirs return directories as well as files - defaults to false
-     * @return array
-     * 
-     */
-    function getFilesInDir($dir, $filter='', $recursive=false, $addDirs=false){
-     
-        $res = array();
+   /**
+   * Iterates over a directory and returns file objects.
+   *
+   * @param string $dir
+   * @param mixed $filter
+   * @param bool $recursive defaults to false
+   * @param bool $addDirs return directories as well as files - defaults to false
+   * @return array
+   * 
+   */
+  function getFilesInDir($dir, $filter='', $recursive=false, $addDirs=false){
+   
+      $res = array();
 
-        $dirIterator = new DirectoryIterator($dir);
-        while($dirIterator->valid()) {
-            
-        	if(!$dirIterator->isDot()) {
-                $file = $dirIterator->getPathname(); 
-                $isDir = is_dir($file); 
-                if(!$isDir || $addDirs){
-                    if(empty($filter) || fnmatch($filter, $file)){
-                        $res[] = $file; 
-                    }
-                }
-                if($isDir && $recursive){
-                    $res = array_merge(
-                                 $res, 
-                                 getFilesInDir($file, $filter='', $recursive));
-                }
-            }  
-            $dirIterator->next();
+      $dirIterator = new DirectoryIterator($dir);
+      while($dirIterator->valid()) {
+          
+      	if(!$dirIterator->isDot()) {
+              $file = $dirIterator->getPathname(); 
+              $isDir = is_dir($file); 
+              if(!$isDir || $addDirs){
+                  if(empty($filter) || fnmatch($filter, $file)){
+                      $res[] = $file; 
+                  }
+              }
+              if($isDir && $recursive){
+                  $res = array_merge(
+                               $res, 
+                               getFilesInDir($file, $filter='', $recursive));
+              }
+          }  
+          $dirIterator->next();
 
-       }
+     }
 
-       return $res;     
-     
-    }  
+     return $res;     
+   
+  }  
 
 
 if(isset($_GET['imageID']) && isset($_GET['imageonly'])){
     $files = getImagesInDir('images');
     if(!isset($_GET['data'])){
-        header("Content-type: png"); 
+        header("Content-type: image/png"); 
         echo file_get_contents($files[$_GET['imageID']-1]);
     }
     else{
-        echo base64_encode_image($files[$_GET['imageID']]);
+        header("Content-type: image/png"); 
+        echo file_get_contents($files[$_GET['imageID']]);
     }
     die();
 }
@@ -117,13 +105,14 @@ $files = getImagesInDir('images');
    		}
    	}
    
-  JSViewer.start(<?php echo count($files); ?>, <?php echo POST_CACHE; ?>, <?php echo PRE_CACHE; ?>, <?php echo isset($_GET['imageID'])?$_GET['imageID']:1; ?>,my_codes);
+  JSViewer.start(<?php echo count($files); ?>, <?php echo POST_CACHE; ?>, <?php echo PRE_CACHE; ?>, <?php echo isset($_GET['imageID'])?$_GET['imageID']:0; ?>,my_codes);
   
 
   
    </script>
 </head>
 <body>
+
 <article id="jsv_left">
   <div id="log"></div>
   <div id="log2"></div>

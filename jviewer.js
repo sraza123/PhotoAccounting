@@ -5,14 +5,11 @@ JSViewer = function () {
     "use strict";
 
     // Globals
-    var my_key_codes, cached_count, cache_group, image_index, current_image_index,
+    var my_key_codes, current_image_index,
         $, renderImage, showPrevImage, showNextImage, keyDownHandler, keyUpHandler,
-        setKeyboardHandlers, getImageDataFailure, toggleArrows, addArrows, getImageDataSuccess,
-        loadImageToLocalStorage, cacheGroup, cachePreviousGroup, log;
+        setKeyboardHandlers, toggleArrows, addArrows, loadImage, cacheGroup, log, images;
 
-    cached_count = 0;
-    cache_group = 1;
-    image_index = 0; // keep track of image being cached
+    images = {};
     current_image_index = 0; // keep track of the current image being viewed
 
     /**
@@ -32,29 +29,21 @@ JSViewer = function () {
      * @param {total_number_images} the total number of images
      * @return {null} 
      */
-    renderImage = function (Y, total_number_images, image_data) {
-        if (current_image_index > total_number_images - 1) {
-            current_image_index = total_number_images - 1;
-        } else if (current_image_index < 0) {
-            current_image_index = 0;
-        } else if (!localStorage.getItem('img-' + current_image_index)) {
-            current_image_index--;
-        } else {
-            /*
-             This sets the image src to the image data and reposition the image arrows,
-             then focus on the konto field
-           */
-            $('jsv_image').src = 'data:image/png;base64,' + image_data;
-            $('jsv_bilag').value = String(current_image_index + 1);
-            $('jsv_konto').focus();
-            $('jsv_link').href = '?imageID=' + (current_image_index + 1) + '&imageonly=1';
+    renderImage = function (Y, image_data) {
+        /*
+         This sets the image src to the image data and reposition the image arrows,
+         then focus on the konto field
+       */
+        $('jsv_image').src = image_data.src;
+        $('jsv_bilag').value = String(current_image_index + 1);
+        $('jsv_konto').focus();
+        $('jsv_link').href = image_data.src;
 
-            var pos_top = Y.one('#jsv_image').get('height') - 200;
+        var pos_top = Y.one('#jsv_image').get('height') - 200;
 
-            pos_top += 'px';
-            Y.one('#arrow_left').setStyle('bottom', pos_top);
-            Y.one('#arrow_right').setStyle('bottom', pos_top);
-        }
+        pos_top += 'px';
+        Y.one('#arrow_left').setStyle('bottom', pos_top);
+        Y.one('#arrow_right').setStyle('bottom', pos_top);
     };
 
     log = function (m) {
@@ -78,13 +67,20 @@ JSViewer = function () {
                 e.stopPropagation();
             }
 
-            current_image_index--;
-            if (current_image_index >= 0) {
-                if (localStorage.getItem('img-' + current_image_index)) {
-                    renderImage(Y, total_number_images, localStorage.getItem('img-' + current_image_index));
-                } else {
-                    log("No more images");
-                }
+            if (current_image_index > 0) {
+                current_image_index--;
+            }
+
+            log(current_image_index);
+
+            if (!images[current_image_index]) {
+                cacheGroup(current_image_index, PRE_CACHE);
+            }
+
+            try {
+              renderImage(Y, images[current_image_index]);
+            } catch(e) {
+              log(e)
             }
         };
     };
@@ -103,19 +99,15 @@ JSViewer = function () {
             if (e) {
                 e.stopPropagation();
             }
-
-            // Check if we need to preload some more images
-            if ((current_image_index + 1) % POST_CACHE == 0) {
-                cache_group++;
-                // Cache the next group of images
-                if (PRE_CACHE * (cache_group - 1) < total_number_images) {
-                    cacheGroup(Y, PRE_CACHE * (cache_group - 1), total_number_images, POST_CACHE, PRE_CACHE);
-                }
-            }
-            if (localStorage.getItem('img-' + (current_image_index + 1))) {
+            if ((current_image_index+1) < total_number_images) {
                 current_image_index++;
-                renderImage(Y, total_number_images, localStorage.getItem('img-' + current_image_index));
             }
+
+            log(current_image_index);
+
+            renderImage(Y, images[current_image_index]);
+
+            cacheGroup(current_image_index, PRE_CACHE);
         };
     };
 
@@ -160,16 +152,8 @@ JSViewer = function () {
             var valas = my_codes[String.fromCharCode(e.keyCode).toLowerCase()];
 
             if (valas != undefined) {
-                current_image_index++;
-                renderImage(Y, total_number_images, localStorage.getItem('img-' + current_image_index));
+                showNextImage(Y, total_number_images, POST_CACHE, PRE_CACHE)(e);
             }
-
-            /*switch (e.keyCode) {
-            case 65:
-              current_image_index++;
-              renderImage(Y, total_number_images, localStorage.getItem('img-' + current_image_index));
-              break;
-            }*/
         };
     };
 
@@ -185,16 +169,6 @@ JSViewer = function () {
     setKeyboardHandlers = function (Y, total_number_images, POST_CACHE, PRE_CACHE) {
         Y.one('doc').on("key", keyDownHandler(Y, total_number_images, POST_CACHE, PRE_CACHE), 'enter,81,87');
         Y.one('doc').on("keyup", keyUpHandler(Y, total_number_images, POST_CACHE, PRE_CACHE));
-    };
-
-    /**
-     * Handles connection error when trying to get image data from the server
-     *
-     * @return {function} 
-     */
-    getImageDataFailure = function () {
-        return function (x, o) {
-        };
     };
 
     /**
@@ -250,60 +224,6 @@ JSViewer = function () {
     };
 
     /**
-     * After we get the image data we render the image data on the screen
-     *
-     * @param {Y} Yui3 object
-     * @param {imageID} the id of image we want to get
-     * @param {total_number_images} the total number of images
-     * @param {POST_CACHE} this is the number of images to render before we start caching again
-     * @param {PRE_CACHE} this is the number of images to cached at a time
-     * @return {function} 
-     */
-    getImageDataSuccess = function (Y, imageID, total_number_images, POST_CACHE, PRE_CACHE, isFirst) {
-        return function (x, o) {
-            /*
-              Once we have the image data we save it to local storage, and if we have finished caching 
-              the first group of images, we render the first image on the screen.
-            */
-            try {
-                if (!$('jsv_image')) {
-                    $('log').innerHTML = "";
-                }
-
-                if (isFirst) {
-                    if (!$('jsv_image')) {
-                        var image_link, first_image;
-                        image_link = $a({
-                            'style': 'position:relative;text-decoration:none;',
-                            'id': 'jsv_link',
-                            'href': '?imageID=' + imageID
-                        });
-
-                        first_image = $img({
-                            'id': 'jsv_image',
-                            'src': 'data:image/png;base64,' + o.responseText
-                        });
-
-                        image_link.appendChild(first_image);
-
-                        $('jsv_left').appendChild(image_link);
-
-                        addArrows(Y, total_number_images, POST_CACHE, PRE_CACHE);
-                        setKeyboardHandlers(Y, total_number_images, POST_CACHE, PRE_CACHE);
-                    }
-
-                    $('log').innerHTML = "";
-                }
-
-                localStorage.setItem('img-' + imageID, o.responseText);
-                cached_count++;
-            } catch (e) {
-                log(e + 'imageID=' + imageID);
-            }
-        };
-    };
-
-    /**
      * Use ajax to get the image data
      *
      * @param {Y} Yui3 object
@@ -313,19 +233,11 @@ JSViewer = function () {
      * @param {PRE_CACHE} this is the number of images to cached at a time
      * @return {null} 
      */
-    loadImageToLocalStorage = function (Y, imageID, total_number_images, POST_CACHE, PRE_CACHE, isFirst) {
-          /*
-           This get the images data for an image from the server
-           and if successful, saves it to local storage
-         */
-        var cfg = {
-            on : {
-                success : getImageDataSuccess(Y, imageID, total_number_images, POST_CACHE, PRE_CACHE, isFirst),
-                failure : getImageDataFailure()
-            }
-        };
+    loadImage = function (imageID) {
+        var i = new Image()
+        i.src = "?imageID=" + imageID + '&data=1&imageonly=1';
 
-        Y.io("?imageID=" + imageID + '&data=1&imageonly=1', cfg);
+        images[imageID] = i;
     };
 
     /**
@@ -338,35 +250,17 @@ JSViewer = function () {
      * @param {PRE_CACHE} this is the number of images to cached at a time
      * @return {null} 
      */
-    cacheGroup = function (Y, from, total_number_images, POST_CACHE, PRE_CACHE) {
-        var i = 0;
-        cached_count = 0;
-        /*
-        We get the image data for each image from the server and save it to local storage
-        */
-        for (i = 0; i < PRE_CACHE; i++) {
-            loadImageToLocalStorage(Y, from + i, total_number_images, POST_CACHE, PRE_CACHE, i == 0);
+    cacheGroup = function (from, PRE_CACHE) {
+        var i = 0, n;
+
+        if (from > 0) {
+            loadImage(from - 1);
+            for (n = from - 2; n > 0; n--) {
+              images[n] = null;
+            }
         }
-    };
-
-    /**
-     * Use ajax to get the image data
-     *
-     * @param {Y} Yui3 object
-     * @param {from} position to start getting images from
-     * @param {total_number_images} the total number of images
-     * @param {POST_CACHE} this is the number of images to render before we start caching again
-     * @param {PRE_CACHE} this is the number of images to cached at a time
-     * @return {null} 
-     */
-    cachePreviousGroup = function (Y, from, total_number_images, POST_CACHE, PRE_CACHE) {
-        var i = 0;
-        cached_count = 0;
-        /*
-        We get the image data for each image from the server and save it to local storage
-       */
         for (i = 0; i < PRE_CACHE; i++) {
-            loadImageToLocalStorage(Y, from - i, total_number_images, POST_CACHE, PRE_CACHE, i == 0);
+            loadImage(from + i);
         }
     };
 
@@ -388,25 +282,48 @@ JSViewer = function () {
 
             YUI().use("io", "dump", "json-parse", 'node', 'event', 'transition', 'node-load', 'anim',  function (Y) {
                 /*
-                  We use html5 local storage to store image, but first we need to clear local storage.
-                */
-                localStorage.clear();
-
-                /*
                     We cache PRE_CACHE number of images at a time, starting from the first image
                 */
-                current_image_index = from - 1;
+                current_image_index = from;
                 $('jsv_bilag').value = String(current_image_index + 1);
-                cacheGroup(Y, current_image_index, total_number_images, POST_CACHE, PRE_CACHE);
 
-                // If we're not starting from the beginning, then we also need to cache the previous images
-                if (current_image_index > 0) {
-                    cachePreviousGroup(Y, current_image_index, total_number_images, POST_CACHE, PRE_CACHE);
+                cacheGroup(current_image_index, PRE_CACHE);
+
+                var imageID = current_image_index;
+
+                if (!$('jsv_image')) {
+                    var image_link, first_image;
+                    image_link = $a({
+                        'style': 'position:relative;text-decoration:none;',
+                        'id': 'jsv_link',
+                        'href': '?imageID=' + imageID
+                    });
+
+                    first_image = $img({
+                        'id': 'jsv_image',
+                        'src': '?imageID=' + from + '&data=1&imageonly=1'
+                    });
+
+                    image_link.appendChild(first_image);
+
+                    $('jsv_left').appendChild(image_link);
+
+                    addArrows(Y, total_number_images, POST_CACHE, PRE_CACHE);
+                    setKeyboardHandlers(Y, total_number_images, POST_CACHE, PRE_CACHE);
                 }
 
-            });
-        }
+                $('log').innerHTML = "";
 
+                renderImage(Y, images[imageID]);
+            });
+
+
+
+        },
+        debug: function() {
+            log(images);
+            log(current_image_index);
+        }
     };
 
 }();
