@@ -90,10 +90,10 @@ $files = getImagesInDir('images');
    }
    
    var my_codes = Array();
-   	my_codes['y'] = 'yyyy';
-   	my_codes['a'] = 'aaaa';
-   	my_codes['b'] = 'bbbb';
-   	my_codes['x'] = 'xxxx';
+   	my_codes['a'] = '3120';
+   	my_codes['s'] = '4100';
+   	my_codes['d'] = '3200';
+   	my_codes['z'] = '3300';
    
    	document.onkeydown=function(e){
    		var valas = my_codes[String.fromCharCode(e.which).toLowerCase()];
@@ -125,24 +125,24 @@ $files = getImagesInDir('images');
                 <div><input type="text" name="jsv_bilag" id="jsv_bilag" value="1" size="55"/></div>
            </li>
            <li>
+                <label for="jsv_modkonto">Modkonto</label>
+                <div><input type="text" name="jsv_modkonto" id="jsv_modkonto" size="55"/></div>
+           </li>
+           <li>
                 <label for="jsv_date">Date</label>
                 <div><input type="text" name="jsv_date" id="jsv_date" size="55"/></div>
-           </li>
-           <li>
-                <label for="jsv_tekst">Tekst</label>
-                <div><textarea name="jsv_tekst" id="jsv_tekst" cols="41"></textarea>
-           </li>
-           <li>
-                <label for="jsv_belob">Bel&oslash;b</label>
-                <div><input type="text" name="jsv_belob" id="jsv_belob" size="55"/></div>
            </li>
            <li>
                 <label for="jsv_konto">Konto</label>
                 <div><input type="text" name="jsv_konto" id="jsv_konto" size="55"/></div>
            </li>
            <li>
-                <label for="jsv_modkonto">Modkonto</label>
-                <div><input type="text" name="jsv_modkonto" id="jsv_modkonto" size="55"/></div>
+                <label for="jsv_belob">Bel&oslash;b</label>
+                <div><input type="text" name="jsv_belob" id="jsv_belob" size="55"/></div>
+           </li>
+           <li>
+                <label for="jsv_tekst">Tekst</label>
+                <div><textarea name="jsv_tekst" id="jsv_tekst" cols="41"></textarea>
            </li>
        </ul>
    </form>
