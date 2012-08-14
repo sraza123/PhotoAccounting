@@ -272,7 +272,7 @@ JSViewer = function () {
 
         // // START : image details
         // // Perhaps we should get the image binary and details in one HTTP request ?
-		Y.io("image_detail.php", {  
+		Y.io("get_image_detail.php", {  
 			// // this is a post  
 			method: 'POST',   
 			// // serialize the form. keeps bugging out ...  
