@@ -140,6 +140,10 @@ $files = getImagesInDir('images');
                 <label for="jsv_konto">Konto</label>
                 <div><input type="text" name="jsv_konto" id="jsv_konto" size="55"/></div>
            </li>
+           <li>
+                <label for="jsv_modkonto">Modkonto</label>
+                <div><input type="text" name="jsv_modkonto" id="jsv_modkonto" size="55"/></div>
+           </li>
        </ul>
    </form>
 </article>
