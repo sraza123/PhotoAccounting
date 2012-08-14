@@ -6,11 +6,18 @@ JSViewer = function () {
 
     // Globals
     var my_key_codes, current_image_index,
+		// // START : image details
+		image_details, populateFields,
+		// // END : image details
         $, renderImage, showPrevImage, showNextImage, keyDownHandler, keyUpHandler,
         setKeyboardHandlers, toggleArrows, addArrows, loadImage, cacheGroup, log, images;
 
     images = {};
     current_image_index = 0; // keep track of the current image being viewed
+    
+    // // START : image details
+    image_details = [];
+    // // END : image details
 
     /**
      * Creates a shortcut for document.getElementById
@@ -38,6 +45,12 @@ JSViewer = function () {
         $('jsv_bilag').value = String(current_image_index + 1);
         $('jsv_konto').focus();
         $('jsv_link').href = image_data.src;
+        
+        // // START : image details
+        // var image_detail = image_details[current_image_index];
+        var image_detail = image_details[current_image_index + 1];
+        populateFields(image_detail);
+        // // END : image details
 
         var pos_top = Y.one('#jsv_image').get('height') - 200;
 
@@ -45,6 +58,24 @@ JSViewer = function () {
         Y.one('#arrow_left').setStyle('bottom', pos_top);
         Y.one('#arrow_right').setStyle('bottom', pos_top);
     };
+
+    // // START : image details
+    populateFields = function (obj) {
+        if (obj === undefined || obj === null) {
+			$('jsv_date').value = '';
+			$('jsv_tekst').value = '';
+			$('jsv_belob').value = '';
+			$('jsv_konto').value = '';
+			$('jsv_modkonto').value = '';
+		} else {
+			$('jsv_date').value = obj['date'];
+			$('jsv_tekst').value = obj['tekst'];
+			$('jsv_belob').value = obj['belob'];
+			$('jsv_konto').value = obj['konto'];
+			$('jsv_modkonto').value = obj['modkonto'];
+		}
+    };
+    // // END : image details
 
     log = function (m) {
         if (window.console) {
@@ -74,7 +105,7 @@ JSViewer = function () {
             log(current_image_index);
 
             if (!images[current_image_index]) {
-                cacheGroup(current_image_index, PRE_CACHE);
+                cacheGroup(Y, current_image_index, PRE_CACHE);
             }
 
             try {
@@ -107,7 +138,7 @@ JSViewer = function () {
 
             renderImage(Y, images[current_image_index]);
 
-            cacheGroup(current_image_index, PRE_CACHE);
+            cacheGroup(Y, current_image_index, PRE_CACHE);
         };
     };
 
@@ -233,11 +264,37 @@ JSViewer = function () {
      * @param {PRE_CACHE} this is the number of images to cached at a time
      * @return {null} 
      */
-    loadImage = function (imageID) {
+    loadImage = function (Y, imageID) {
         var i = new Image()
         i.src = "?imageID=" + imageID + '&data=1&imageonly=1';
 
         images[imageID] = i;
+
+        // // START : image details
+        // // Perhaps we should get the image binary and details in one HTTP request ?
+		Y.io("image_detail.php", {  
+			// // this is a post  
+			method: 'POST',   
+			// // serialize the form. keeps bugging out ...  
+			// form: {   
+			//	id: imageID,  
+			// }, 
+			data : "id=" +  imageID,
+			// // ajax lifecycle event handlers  
+			on: {   
+				complete: function (id, response) {  
+					// var data = response.responseText; // Response data.  
+					var obj = Y.JSON.parse(response.responseText);
+					image_details[imageID] = obj;
+					log(obj);
+					// // Update fields too if the image is currently on display
+					if ((imageID == current_image_index + 1) && (obj !== null)) {
+						populateFields(obj);
+					}
+				}  
+			}  
+		});
+        // // END : image details
     };
 
     /**
@@ -250,17 +307,17 @@ JSViewer = function () {
      * @param {PRE_CACHE} this is the number of images to cached at a time
      * @return {null} 
      */
-    cacheGroup = function (from, PRE_CACHE) {
+    cacheGroup = function (Y, from, PRE_CACHE) {
         var i = 0, n;
 
         if (from > 0) {
-            loadImage(from - 1);
+            loadImage(Y, from - 1);
             for (n = from - 2; n > 0; n--) {
               images[n] = null;
             }
         }
         for (i = 0; i < PRE_CACHE; i++) {
-            loadImage(from + i);
+            loadImage(Y, from + i);
         }
     };
 
@@ -287,7 +344,7 @@ JSViewer = function () {
                 current_image_index = from;
                 $('jsv_bilag').value = String(current_image_index + 1);
 
-                cacheGroup(current_image_index, PRE_CACHE);
+                cacheGroup(Y, current_image_index, PRE_CACHE);
 
                 var imageID = current_image_index;
 
