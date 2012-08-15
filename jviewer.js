@@ -68,12 +68,7 @@ JSViewer = function () {
     // // START : image details
     loadImageDetail = function (Y, imageID) {
 		Y.io("get_image_detail.php", {  
-			// // this is a post  
 			method: 'POST',   
-			// // serialize the form. keeps bugging out ...  
-			// form: {   
-			//	id: imageID,  
-			// }, 
 			data : "image_id=" +  imageID,
 			// // ajax lifecycle event handlers  
 			on: {   
@@ -81,8 +76,6 @@ JSViewer = function () {
 					// var data = response.responseText; // Response data.  
 					var obj = Y.JSON.parse(response.responseText);
 					image_details[imageID] = obj;
-					
-					// log(obj);
 					
 					// // Update fields too if the image is currently on display
 					if ((imageID == current_image_index + 1) && (obj !== null)) {
