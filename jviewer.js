@@ -155,23 +155,6 @@ JSViewer = function () {
     keyDownHandler = function (Y, total_number_images, POST_CACHE, PRE_CACHE) {
         return function (e) {
             e.preventDefault();
-			
-			var key = String.fromCharCode(e.keyCode).toLowerCase();
-            var valas = my_key_codes[key];
-			
-			if(valas != undefined) {
-				
-				if(my_key_codes[key][1] == 0) {
-					current_pressed_keys++;
-					my_key_codes[key][1] = "1";
-
-				$('jsv_konto').value = valas[0];
-				//$('jsv_tekst').value = current_pressed_keys;   		
-   		
-				//comment out the next line if you want the cursor to stay in the field.
-				$('jsv_konto').blur();
-				}
-			}
 
             switch (e.keyCode) {
             case 13: // enter
@@ -186,53 +169,45 @@ JSViewer = function () {
     };
 
     /**
-     * Handles a keyup event
-     *
-     * @param {Y} Yui3 object
-     * @param {total_number_images} the total number of images
-     * @param {POST_CACHE} this is the number of images to render before we start caching again
-     * @param {PRE_CACHE} this is the number of images to cached at a time
-     * @return {null} 
-     */
+* Handles a keyup event
+*
+* @param {Y} Yui3 object
+* @param {total_number_images} the total number of images
+* @param {POST_CACHE} this is the number of images to render before we start caching again
+* @param {PRE_CACHE} this is the number of images to cached at a time
+* @return {null}
+*/
     keyUpHandler = function (Y, total_number_images, POST_CACHE, PRE_CACHE) {
         return function (e) {
             e.preventDefault();
-			
-			//alert('keyup');
 
-			var key = String.fromCharCode(e.keyCode).toLowerCase();
-            var valas = my_key_codes[key];
+            var valas = my_codes[String.fromCharCode(e.keyCode).toLowerCase()];
 
             if (valas != undefined) {
-				current_pressed_keys--;
-				my_key_codes[key][1] = "0";
-				
-				
-				$('jsv_konto').value = valas[0];   		
-				//$('jsv_tekst').value = current_pressed_keys;   		
-   				//comment out the next line if you want the cursor to stay in the field.
-				$('jsv_konto').blur();
-				
-				if(!current_pressed_keys) {
-				alert('saved: ' + valas[0]);
-				
-                showNextImage(Y, total_number_images, POST_CACHE, PRE_CACHE)(e);
-				}
+                current_image_index++;
+                renderImage(Y, total_number_images, localStorage.getItem('img-' + current_image_index));
             }
+
+            /*switch (e.keyCode) {
+case 65:
+current_image_index++;
+renderImage(Y, total_number_images, localStorage.getItem('img-' + current_image_index));
+break;
+}*/
         };
     };
 
     /**
-     * Initialize the keyboard handlers
-     *
-     * @param {Y} Yui3 object
-     * @param {total_number_images} the total number of images
-     * @param {POST_CACHE} this is the number of images to render before we start caching again
-     * @param {PRE_CACHE} this is the number of images to cached at a time
-     * @return {null} 
-     */
+* Initialize the keyboard handlers
+*
+* @param {Y} Yui3 object
+* @param {total_number_images} the total number of images
+* @param {POST_CACHE} this is the number of images to render before we start caching again
+* @param {PRE_CACHE} this is the number of images to cached at a time
+* @return {null}
+*/
     setKeyboardHandlers = function (Y, total_number_images, POST_CACHE, PRE_CACHE) {
-        Y.one('doc').on("keydown", keyDownHandler(Y, total_number_images, POST_CACHE, PRE_CACHE));
+        Y.one('doc').on("key", keyDownHandler(Y, total_number_images, POST_CACHE, PRE_CACHE), 'enter,81,87');
         Y.one('doc').on("keyup", keyUpHandler(Y, total_number_images, POST_CACHE, PRE_CACHE));
     };
 
