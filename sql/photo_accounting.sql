@@ -1,3 +1,6 @@
+-- --To create the database :
+-- sudo -u postgres createdb photo_accounting
+
 DROP TABLE IF EXISTS entries;
 CREATE TABLE entries (id SERIAL PRIMARY KEY, customer_id INT, entry_id INT, image_id INT, entry_date DATE, text VARCHAR(9999), amount NUMERIC(20, 2), account INT, offset_account INT);
 
