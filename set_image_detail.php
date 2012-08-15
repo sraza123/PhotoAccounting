@@ -17,9 +17,12 @@ $account = pg_escape_string($_POST['konto']);
 $offset_account = pg_escape_string($_POST['modkonto']);
 
 // Construct SQL query
-$query = "UPDATE entries SET entry_date = '{$entry_date}', "
-	."text = '{$text}', amount = '{$amount}', "
-	."account = '{$account}', offset_account = '{$offset_account}' "
+$query = "UPDATE entries SET "
+	."entry_date = '{$entry_date}', "
+	."text = '{$text}', "
+	."amount = '{$amount}', "
+	."account = '{$account}', "
+	."offset_account = '{$offset_account}' "
 	."WHERE image_id = {$image_id}";
 $result = pg_query($query); // or die('Query failed: ' . pg_last_error());
 
