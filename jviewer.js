@@ -6,15 +6,20 @@ JSViewer = function () {
 
     // Globals
     var my_key_codes, current_image_index,
+        $, renderImage, showPrevImage, showNextImage, 
+        keyDownHandler, keyUpHandler, setKeyboardHandlers, 
+        toggleArrows, addArrows, 
+        loadImage, images,
+        cacheGroup, log, 
 		// // START : image details
-		image_details, populateFields,
+		image_details, loadImageDetail, populateImageDetail, saveImageDetail;
 		// // END : image details
-        $, renderImage, showPrevImage, showNextImage, keyDownHandler, keyUpHandler,
-        setKeyboardHandlers, toggleArrows, addArrows, loadImage, cacheGroup, log, images;
 
     images = {};
     current_image_index = 0; // keep track of the current image being viewed
-	current_pressed_keys = 0;
+	
+	// Next line remarked as it is not used anywhere and hangs the page.
+	// current_pressed_keys = 0;
     
     // // START : image details
     image_details = [];
@@ -50,7 +55,7 @@ JSViewer = function () {
         // // START : image details
         // var image_detail = image_details[current_image_index];
         var image_detail = image_details[current_image_index + 1];
-        populateFields(image_detail);
+        populateImageDetail(image_detail);
         // // END : image details
 
         var pos_top = Y.one('#jsv_image').get('height') - 200;
@@ -61,7 +66,34 @@ JSViewer = function () {
     };
 
     // // START : image details
-    populateFields = function (obj) {
+    loadImageDetail = function (Y, imageID) {
+		Y.io("get_image_detail.php", {  
+			// // this is a post  
+			method: 'POST',   
+			// // serialize the form. keeps bugging out ...  
+			// form: {   
+			//	id: imageID,  
+			// }, 
+			data : "image_id=" +  imageID,
+			// // ajax lifecycle event handlers  
+			on: {   
+				complete: function (id, response) {  
+					// var data = response.responseText; // Response data.  
+					var obj = Y.JSON.parse(response.responseText);
+					image_details[imageID] = obj;
+					
+					// log(obj);
+					
+					// // Update fields too if the image is currently on display
+					if ((imageID == current_image_index + 1) && (obj !== null)) {
+						populateImageDetail(obj);
+					}
+				}  
+			}  
+		});
+    };
+
+    populateImageDetail = function (obj) {
         if (obj === undefined || obj === null) {
 			$('jsv_date').value = '';
 			$('jsv_tekst').value = '';
@@ -76,6 +108,90 @@ JSViewer = function () {
 			$('jsv_modkonto').value = obj['modkonto'];
 		}
     };
+    
+    saveImageDetail = function (Y) {
+		var image_id = current_image_index + 1;
+		
+		// Get field values for obj
+		// var date = $('jsv_date').value;
+		var ddate = $('jsv_date').value;
+		var tekst = $('jsv_tekst').value;
+		var belob = $('jsv_belob').value;
+		var konto = $('jsv_konto').value;
+		var modkonto = $('jsv_modkonto').value;
+
+		// Get obj in RAM
+		var obj = image_details[image_id];
+		
+		// Abort silently if there is no obj
+        if (obj === undefined || obj === null) { return; }
+		
+		// If there is a difference between the object in RAM 
+		// and the field values, save object.
+		if (
+			// obj['date'] == date &&
+			obj['date'] == ddate &&
+			obj['tekst'] == tekst &&
+			obj['belob'] == belob &&
+			obj['konto'] == konto &&
+			obj['modkonto'] == modkonto
+			) {
+				
+			log('no need to save');
+			
+		} else {
+
+			// Update object in RAM
+			obj['date'] = ddate;
+			obj['tekst'] = tekst;
+			obj['belob'] = belob;
+			obj['konto'] = konto;
+			obj['modkonto'] = modkonto;
+			image_details[image_id] = obj;
+			
+			Y.io("set_image_detail.php", {  
+				// // this is a post  
+				method: 'POST',   
+				// // serialize the form. keeps bugging out ...  
+				// form: {   
+				//	id: imageID,  
+				// }, 
+				data : "image_id=" +  image_id 
+					// + "&date=" + date
+					+ "&date=" + ddate
+					+ "&tekst=" + tekst
+					+ "&belob=" + belob
+					+ "&konto=" + konto
+					+ "&modkonto=" + modkonto,
+				// // ajax lifecycle event handlers  
+				on: {   
+					complete: function (id, response) {  
+						var jsonObject = Y.JSON.parse(response.responseText);
+						
+						// log(jsonObject['message']);
+						
+						if (jsonObject['status'] == 1) {
+							/*
+							// Update object in RAM
+							obj['date'] = ddate;
+							obj['tekst'] = tekst;
+							obj['belob'] = belob;
+							obj['konto'] = konto;
+							obj['modkonto'] = modkonto;
+							image_details[image_id] = obj;
+
+							// // Update fields too if the image is currently on display
+							if (image_id == current_image_index + 1) {
+								populateImageDetail(obj);
+							}
+							*/
+						}
+					}  
+				}  
+			});
+
+		}
+	};
     // // END : image details
 
     log = function (m) {
@@ -98,7 +214,11 @@ JSViewer = function () {
             if (e) {
                 e.stopPropagation();
             }
-
+            
+			// // START : image details
+            saveImageDetail(Y);
+			// // END : image details
+            
             if (current_image_index > 0) {
                 current_image_index--;
             }
@@ -131,6 +251,11 @@ JSViewer = function () {
             if (e) {
                 e.stopPropagation();
             }
+            
+			// // START : image details
+            saveImageDetail(Y);
+			// // END : image details
+            
             if ((current_image_index+1) < total_number_images) {
                 current_image_index++;
             }
@@ -281,28 +406,7 @@ break;
 
         // // START : image details
         // // Perhaps we should get the image binary and details in one HTTP request ?
-		Y.io("get_image_detail.php", {  
-			// // this is a post  
-			method: 'POST',   
-			// // serialize the form. keeps bugging out ...  
-			// form: {   
-			//	id: imageID,  
-			// }, 
-			data : "id=" +  imageID,
-			// // ajax lifecycle event handlers  
-			on: {   
-				complete: function (id, response) {  
-					// var data = response.responseText; // Response data.  
-					var obj = Y.JSON.parse(response.responseText);
-					image_details[imageID] = obj;
-					log(obj);
-					// // Update fields too if the image is currently on display
-					if ((imageID == current_image_index + 1) && (obj !== null)) {
-						populateFields(obj);
-					}
-				}  
-			}  
-		});
+        loadImageDetail(Y, imageID);
         // // END : image details
     };
 
