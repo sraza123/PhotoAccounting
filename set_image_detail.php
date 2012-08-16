@@ -1,7 +1,7 @@
 <?php
 // Abort early if there is nothing to process
 // if (!isset($_POST['id'])) { die(); }
-if (!isset($_POST['image_id'])) { die(); }
+if (!isset($_POST['image_id']) || empty($_POST['image_id']) || $_POST['image_id'] < 1) { die(); }
 
 // $dbconn is declared in this "include_once"
 include_once "includes/db.php";
@@ -16,13 +16,19 @@ $amount = pg_escape_string($_POST['belob']);
 $account = pg_escape_string($_POST['konto']);
 $offset_account = pg_escape_string($_POST['modkonto']);
 
+if (empty($entry_date)) { $entry_date = date('Y-m-d'); }
+// if (empty($text)) { $text = null; }
+if (empty($amount)) { $amount = 0; }
+if (empty($account)) { $account = 'null'; }
+if (empty($offset_account)) { $offset_account = 'null'; }
+
 // Construct SQL query
 $query = "UPDATE entries SET "
 	."entry_date = '{$entry_date}', "
 	."text = '{$text}', "
-	."amount = '{$amount}', "
-	."account = '{$account}', "
-	."offset_account = '{$offset_account}' "
+	."amount = {$amount}, "
+	."account = {$account}, "
+	."offset_account = {$offset_account} "
 	."WHERE image_id = {$image_id}";
 $result = pg_query($query); // or die('Query failed: ' . pg_last_error());
 
