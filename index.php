@@ -118,27 +118,27 @@ $('jsv_konto').blur();
        <ul>
            <li>
                 <label for="jsv_bilag">Bilag</label>
-                <div><input type="text" name="jsv_bilag" id="jsv_bilag" value="1" size="55"/></div>
+                <div><input type="text" name="jsv_bilag" id="jsv_bilag" value="1" size="10"/><span id="error_bilag" class="field_error"></span></div>
            </li>
            <li>
                 <label for="jsv_modkonto">Modkonto</label>
-                <div><input type="text" name="jsv_modkonto" id="jsv_modkonto" size="55"/></div>
+                <div><input type="text" name="jsv_modkonto" id="jsv_modkonto" size="10"/><span id="error_modkonto" class="field_error"></span></div>
            </li>
            <li>
                 <label for="jsv_date">Date</label>
-                <div><input type="text" name="jsv_date" id="jsv_date" size="55"/></div>
+                <div><input type="text" name="jsv_date" id="jsv_date" size="10"/><span id="error_date" class="field_error"></span></div>
            </li>
            <li>
                 <label for="jsv_konto">Konto</label>
-                <div><input type="text" name="jsv_konto" id="jsv_konto" size="55"/></div>
+                <div><input type="text" name="jsv_konto" id="jsv_konto" size="10"/><span id="error_konto" class="field_error"></span></div>
            </li>
            <li>
                 <label for="jsv_belob">Bel&oslash;b</label>
-                <div><input type="text" name="jsv_belob" id="jsv_belob" size="55"/></div>
+                <div><input type="text" name="jsv_belob" id="jsv_belob" size="10"/><span id="error_belob" class="field_error"></span></div>
            </li>
            <li>
                 <label for="jsv_tekst">Tekst</label>
-                <div><textarea name="jsv_tekst" id="jsv_tekst" cols="41"></textarea>
+                <div><textarea name="jsv_tekst" id="jsv_tekst" cols="41"></textarea><br/><span id="error_tekst" class="field_error"></span></div>
            </li>
        </ul>
    </form>

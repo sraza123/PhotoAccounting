@@ -33,7 +33,17 @@ if ($rows == 0) {
 $detail = null;
 while ($row = pg_fetch_assoc($result)) {
 	$detail = new stdClass;
-	$detail->date = $row['entry_date'];
+
+	// This returns date strings like 2012-03-28
+	// $detail->date = $row['entry_date'];
+
+	// This returns date strings like 28-03-2012
+	if (($timestamp = strtotime($row['entry_date'])) === false) {
+		$detail->date = date('d-m-Y');
+	} else {
+		$detail->date = date('d-m-Y', $timestamp); 
+	}
+
 	$detail->tekst = $row['text'];
 	$detail->belob = $row['amount'];
 	$detail->konto = $row['account'];

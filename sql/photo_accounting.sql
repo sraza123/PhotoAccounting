@@ -1,13 +1,16 @@
 -- --To create the database :
 -- sudo -u postgres createdb photo_accounting
 
+-- -- To execute this script within a PostgreSQL session (adjust path accordingly) :
+-- \i /home/pmg/Documents/photo_accounting/www/PhotoAccounting/sql/photo_accounting.sql
+
 DROP TABLE IF EXISTS entries;
 CREATE TABLE entries (id SERIAL PRIMARY KEY, customer_id INT, entry_id INT, image_id INT, entry_date DATE DEFAULT current_date, text VARCHAR(9999), amount NUMERIC(20, 2) DEFAULT 0.00, account INT, offset_account INT);
 CREATE INDEX image_id_idx ON entries (image_id);
 
 INSERT INTO entries (customer_id, entry_id, image_id, entry_date, text, amount, account, offset_account) VALUES (1,1,1,'2012-08-14','TEST 1',1,1,1);
 INSERT INTO entries (customer_id, entry_id, image_id, entry_date, text, amount, account, offset_account) VALUES (2,2,2,'2012-08-14','TEST 2',2,2,2);
-INSERT INTO entries (customer_id, entry_id, image_id, entry_date, text, amount, account, offset_account) VALUES (3,3,3,'2012-08-14','TEST 3',3,3,3);
+-- INSERT INTO entries (customer_id, entry_id, image_id, entry_date, text, amount, account, offset_account) VALUES (3,3,3,'2012-08-14','TEST 3',3,3,3);
 INSERT INTO entries (customer_id, entry_id, image_id, entry_date, text, amount, account, offset_account) VALUES (4,4,4,'2012-08-14','TEST 4',4,4,4);
 INSERT INTO entries (customer_id, entry_id, image_id, entry_date, text, amount, account, offset_account) VALUES (5,5,5,'2012-08-14','TEST 5',5,5,5);
 INSERT INTO entries (customer_id, entry_id, image_id, entry_date, text, amount, account, offset_account) VALUES (6,6,6,'2012-08-14','TEST 6',6,6,6);
@@ -32,3 +35,5 @@ INSERT INTO entries (customer_id, entry_id, image_id, entry_date, text, amount, 
 INSERT INTO entries (customer_id, entry_id, image_id, entry_date, text, amount, account, offset_account) VALUES (25,25,25,'2012-08-14','TEST 25',25,25,25);
 INSERT INTO entries (customer_id, entry_id, image_id, entry_date, text, amount, account, offset_account) VALUES (26,26,26,'2012-08-14','TEST 26',26,26,26);
 INSERT INTO entries (customer_id, entry_id, image_id, entry_date, text, amount, account, offset_account) VALUES (27,27,27,'2012-08-14','TEST 27',27,27,27); 
+
+SELECT * FROM entries ORDER BY image_id;
