@@ -74,12 +74,18 @@ JSViewer = function () {
 			on: {   
 				complete: function (id, response) {  
 					// var data = response.responseText; // Response data.  
-					var obj = Y.JSON.parse(response.responseText);
-					image_details[imageID] = obj;
+					var jsonObject = null;
 					
+					try {
+						jsonObject = Y.JSON.parse(response.responseText);
+						image_details[imageID] = jsonObject;
+					} catch(e) {
+					  log(e)
+					}
+
 					// // Update fields too if the image is currently on display
-					if ((imageID == current_image_index + 1) && (obj !== null)) {
-						populateImageDetail(obj);
+					if ((imageID == current_image_index + 1) && (jsonObject !== null)) {
+						populateImageDetail(jsonObject);
 					}
 				}  
 			}  
