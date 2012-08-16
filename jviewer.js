@@ -5,14 +5,15 @@ JSViewer = function () {
     "use strict";
 
     // Globals
-    var my_key_codes, current_image_index,
+    var my_key_codes, my_image_count, current_image_index,
         $, renderImage, showPrevImage, showNextImage, 
         keyDownHandler, keyUpHandler, setKeyboardHandlers, 
         toggleArrows, addArrows, 
         loadImage, images,
         cacheGroup, log, 
 		// // START : image details
-		image_details, loadImageDetail, populateImageDetail, saveImageDetail;
+		image_details, image_errors, restrict_db_update,
+		loadImageDetail, populateImageDetail, saveImageDetail;
 		// // END : image details
 
     images = {};
@@ -23,6 +24,8 @@ JSViewer = function () {
     
     // // START : image details
     image_details = [];
+    image_errors = [];
+    restrict_db_update = [];
     // // END : image details
 
     /**
@@ -43,10 +46,10 @@ JSViewer = function () {
      * @return {null} 
      */
     renderImage = function (Y, image_data) {
-        /*
-         This sets the image src to the image data and reposition the image arrows,
-         then focus on the konto field
-       */
+		/*
+		This sets the image src to the image data and reposition the image arrows,
+		then focus on the konto field
+		*/
         $('jsv_image').src = image_data.src;
         $('jsv_bilag').value = String(current_image_index + 1);
         $('jsv_konto').focus();
@@ -55,7 +58,7 @@ JSViewer = function () {
         // // START : image details
         // var image_detail = image_details[current_image_index];
         var image_detail = image_details[current_image_index + 1];
-        populateImageDetail(image_detail);
+        populateImageDetail(Y, image_detail);
         // // END : image details
 
         var pos_top = Y.one('#jsv_image').get('height') - 200;
@@ -67,6 +70,19 @@ JSViewer = function () {
 
     // // START : image details
     loadImageDetail = function (Y, imageID) {
+		// Skip loading from database if:
+		// 1) a save to db is in progress
+		// 2) image has validation errors
+		// 3) image does not exists i.e. pressing 'q' at the first image or 'w' at the last image
+		if (
+			( (typeof(restrict_db_update[imageID]) != "undefined") && (restrict_db_update[imageID] !== null) ) ||
+			( (typeof(image_errors[imageID]) != "undefined") && (image_errors[imageID] !== null) ) ||
+			imageID == 0 ||
+			imageID > my_image_count) {
+			log('skipping database loading of image id ' + imageID);
+			return;
+		}
+
 		Y.io("get_image_detail.php", {  
 			method: 'POST',   
 			data : "image_id=" +  imageID,
@@ -85,14 +101,14 @@ JSViewer = function () {
 
 					// // Update fields too if the image is currently on display
 					if ((imageID == current_image_index + 1) && (jsonObject !== null)) {
-						populateImageDetail(jsonObject);
+						populateImageDetail(Y, jsonObject);
 					}
 				}  
 			}  
 		});
     };
 
-    populateImageDetail = function (obj) {
+    populateImageDetail = function (Y, obj) {
         if (obj === undefined || obj === null) {
 			$('jsv_date').value = '';
 			$('jsv_tekst').value = '';
@@ -106,9 +122,31 @@ JSViewer = function () {
 			$('jsv_konto').value = obj['konto'];
 			$('jsv_modkonto').value = obj['modkonto'];
 		}
+
+		var image_id = current_image_index + 1;
+		if ( (typeof(image_errors[image_id]) != "undefined")
+			&& (image_errors[image_id] !== null) ) {
+			// Populate errors next to their respective fields
+			var errors = image_errors[image_id];
+			// log(errors['date']);
+			Y.one('#error_date').setHTML(errors['date']);
+			Y.one('#error_tekst').setHTML(errors['tekst']);
+			Y.one('#error_belob').setHTML(errors['belob']);
+			Y.one('#error_konto').setHTML(errors['konto']);
+			Y.one('#error_modkonto').setHTML(errors['modkonto']);
+		} else {
+			// Clear field errors from previous image
+			Y.all('span.field_error').setHTML('');
+		}
     };
     
-    saveImageDetail = function (Y) {
+    saveImageDetail = function (Y, current_image_index) {
+		// Skip saving to database if:
+		// 1) image does not exists i.e. pressing 'w' at the last image
+        if (current_image_index == my_image_count) {
+			return;
+		}
+		
 		var image_id = current_image_index + 1;
 		
 		// Get field values for obj
@@ -123,10 +161,12 @@ JSViewer = function () {
 		var obj = image_details[image_id];
 		
 		// Abort silently if there is no obj
-        if (obj === undefined || obj === null) { return; }
+        // if (obj === undefined || obj === null) { return; }
+		if ( (typeof(obj) == "undefined") || (obj === null) ) { return; }
 		
 		// If there is a difference between the object in RAM 
 		// and the field values, save object.
+		// NOTE : "undefined" is not the same as an empty string :)
 		if (
 			// obj['date'] == date &&
 			obj['date'] == ddate &&
@@ -136,7 +176,7 @@ JSViewer = function () {
 			obj['modkonto'] == modkonto
 			) {
 				
-			log('no need to save');
+			log('no need to save ' + image_id);
 			
 		} else {
 
@@ -164,10 +204,22 @@ JSViewer = function () {
 					+ "&modkonto=" + modkonto,
 				// // ajax lifecycle event handlers  
 				on: {   
+					start: function (id) {
+						log('saving ' + image_id + ' ...');
+
+						// Prevent other threads from overwriting the user's
+						// typed in values while the request is in progress.
+						restrict_db_update[image_id] = true;
+					},
 					complete: function (id, response) {  
 						var jsonObject = Y.JSON.parse(response.responseText);
 						
-						// log(jsonObject['message']);
+						log(image_id + ' saved');
+						log(jsonObject);
+						
+						if (jsonObject['status'] == 0) {
+							image_errors[image_id] = jsonObject['errors'];
+						}
 						
 						if (jsonObject['status'] == 1) {
 							/*
@@ -181,9 +233,15 @@ JSViewer = function () {
 
 							// // Update fields too if the image is currently on display
 							if (image_id == current_image_index + 1) {
-								populateImageDetail(obj);
+								populateImageDetail(Y, obj);
 							}
 							*/
+							
+							// Remove its errors
+							delete image_errors[image_id];
+							
+							// Remove update restriction
+							delete restrict_db_update[image_id];
 						}
 					}  
 				}  
@@ -215,14 +273,14 @@ JSViewer = function () {
             }
             
 			// // START : image details
-            saveImageDetail(Y);
+            saveImageDetail(Y, current_image_index + 0);
 			// // END : image details
             
             if (current_image_index > 0) {
                 current_image_index--;
             }
 
-            log(current_image_index);
+            log('showPrevImage : current_image_index = ' + current_image_index);
 
             if (!images[current_image_index]) {
                 cacheGroup(Y, current_image_index, PRE_CACHE);
@@ -252,14 +310,14 @@ JSViewer = function () {
             }
             
 			// // START : image details
-            saveImageDetail(Y);
+			saveImageDetail(Y, current_image_index + 0);
 			// // END : image details
-            
+			
             if ((current_image_index+1) < total_number_images) {
                 current_image_index++;
             }
 
-            log(current_image_index);
+            log('showNextImage : current_image_index = ' + current_image_index);
 
             renderImage(Y, images[current_image_index]);
 
@@ -447,6 +505,7 @@ break;
          */
         start : function (total_number_images, POST_CACHE, PRE_CACHE, from, key_codes) {
 
+            my_image_count = total_number_images;
             my_key_codes = key_codes;
 
             YUI().use("io", "dump", "json-parse", 'node', 'event', 'transition', 'node-load', 'anim',  function (Y) {

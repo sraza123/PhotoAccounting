@@ -37,5 +37,11 @@ form#jsv_form ul li label{
 
 form#jsv_form ul li div{
     float: left;
-    width: 300px;
+    /* width: 300px; */
+    width: 450px;
+}
+
+span.field_error{
+	color:red;
+	font-size:small;
 }
