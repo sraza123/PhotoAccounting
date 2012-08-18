@@ -48,7 +48,10 @@ JSViewer = function () {
         This sets the image src to the image data and reposition the image arrows,
         then focus on the konto field
         */
+        $('jsv_image').src = 'about:blank';
         $('jsv_image').src = image_data.src;
+        $('jsv_image').style.maxWidth = "100%";
+        $('jsv_image').style.maxHeight = "100%";
         $('jsv_bilag').value = String(current_image_index + 1);
         $('jsv_konto').focus();
         $('jsv_link').href = image_data.src;
@@ -81,7 +84,7 @@ JSViewer = function () {
             return;
         }
         // 3) image does not exists i.e. pressing 'q' at the first image or 'w' at the last image
-        if (imageID == 0 || imageID > my_image_count) {
+        if (imageID < 0 || imageID > my_image_count) {
             log('skipping database loading of image id ' + imageID);
             return;
         }
@@ -99,7 +102,9 @@ JSViewer = function () {
                         jsonObject = Y.JSON.parse(response.responseText);
                         image_details[imageID] = jsonObject;
                     } catch (e) {
+                        log("Failed to load image details")
                         log(e);
+                        log(response);
                     }
 
                     // // Update fields too if the image is currently on display
