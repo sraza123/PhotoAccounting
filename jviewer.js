@@ -48,7 +48,7 @@ JSViewer = function () {
         This sets the image src to the image data and reposition the image arrows,
         then focus on the konto field
         */
-        $('jsv_image').src = 'about:blank';
+        $('jsv_image').src = 'loading_gif.gif';
         $('jsv_image').src = image_data.src;
         $('jsv_image').style.maxWidth = "100%";
         $('jsv_image').style.maxHeight = "100%";
