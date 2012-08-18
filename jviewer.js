@@ -211,15 +211,15 @@ JSViewer = function () {
                     },
                     complete: function (id, response) {
                         var jsonObject = Y.JSON.parse(response.responseText);
-    
+
                         log(image_id + ' saved');
                         log(jsonObject);
-    
-                        if (jsonObject['status'] == 0) {
-                            image_errors[image_id] = jsonObject['errors'];
+
+                        if (jsonObject.status == 0) {
+                            image_errors[image_id] = jsonObject.errors;
                         }
-    
-                        if (jsonObject['status'] == 1) {
+
+                        if (jsonObject.status == 1) {
                             /*
                             // Update object in RAM
                             obj['date'] = ddate;
@@ -271,7 +271,7 @@ JSViewer = function () {
             }
 
             // // START : image details
-            saveImageDetail(Y, current_image_index + 0);
+            saveImageDetail(Y, current_image_index);
             // // END : image details
 
             if (current_image_index > 0) {
@@ -286,8 +286,8 @@ JSViewer = function () {
 
             try {
                 renderImage(Y, images[current_image_index]);
-            } catch(e) {
-                log(e)
+            } catch (e) {
+                log(e);
             }
         };
     };
@@ -308,10 +308,10 @@ JSViewer = function () {
             }
 
             // // START : image details
-            saveImageDetail(Y, current_image_index + 0);
+            saveImageDetail(Y, current_image_index);
             // // END : image details
 
-            if ((current_image_index+1) < total_number_images) {
+            if ((current_image_index + 1) < total_number_images) {
                 current_image_index++;
             }
 
@@ -361,7 +361,7 @@ JSViewer = function () {
         return function (e) {
             e.preventDefault();
 
-            var valas = my_codes[String.fromCharCode(e.keyCode).toLowerCase()];
+            var valas = my_key_codes[String.fromCharCode(e.keyCode).toLowerCase()];
 
             if (valas != undefined) {
                 current_image_index++;
@@ -454,7 +454,7 @@ JSViewer = function () {
      * @return {null}
      */
     loadImage = function (Y, imageID) {
-        var i = new Image()
+        var i = new Image();
         i.src = "?imageID=" + imageID + '&data=1&imageonly=1';
 
         images[imageID] = i;
@@ -546,7 +546,7 @@ JSViewer = function () {
 
 
         },
-        debug: function() {
+        debug: function () {
             log(images);
             log(current_image_index);
         }
