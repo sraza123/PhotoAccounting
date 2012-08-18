@@ -2,10 +2,18 @@
 // See sql/photo_accounting.sql for the relevant table structure & sample data
 
 // Abort early if there is nothing to process
-if (!isset($_POST['image_id']) || empty($_POST['image_id']) || $_POST['image_id'] < 1) { die(); }
+if (!isset($_POST['image_id'])) { 
+	header("HTTP/1.1 500 Server error")
+	die("Invalid request");
+}
+
+if ($_POST['image_id'] < 0) {
+	header("HTTP/1.1 404 Not Found")
+	die("Invalid request");
+}
 
 // $dbconn is declared in this "include_once"
-include_once "includes/db.php";
+require_once "includes/db.php";
 
 // Sanitize database inputs
 $image_id = pg_escape_string($_POST['image_id']);
@@ -30,7 +38,7 @@ if ($rows == 0) {
 }
 
 // If a record was found, set it
-$detail = null;
+$detail = array();
 while ($row = pg_fetch_assoc($result)) {
 	$detail = new stdClass;
 
@@ -58,5 +66,3 @@ pg_close($dbconn);
 
 // Print results in JSON
 echo json_encode($detail);
-?>
-
