@@ -1,4 +1,4 @@
-/*jslint  browser: true, indent: 4, plusplus: true, eqeq: true, */
+/*jslint  browser: true, indent: 4, plusplus: true, eqeq: true*/
 /** COPYRIGHT Time at Task */
 JSViewer = function () {
 
@@ -6,22 +6,19 @@ JSViewer = function () {
 
     // Globals
     var my_key_codes, my_image_count, current_image_index,
-        $, renderImage, showPrevImage, showNextImage, 
-        keyDownHandler, keyUpHandler, setKeyboardHandlers, 
-        toggleArrows, addArrows, 
+        $, renderImage, showPrevImage, showNextImage,
+        keyDownHandler, keyUpHandler, setKeyboardHandlers,
+        toggleArrows, addArrows,
         loadImage, images,
-        cacheGroup, log, 
-		// // START : image details
-		image_details, image_errors, restrict_db_update,
-		loadImageDetail, populateImageDetail, saveImageDetail;
-		// // END : image details
+        cacheGroup, log,
+        // // START : image details
+        image_details, image_errors, restrict_db_update,
+        loadImageDetail, populateImageDetail, saveImageDetail;
+        // // END : image details
 
     images = {};
     current_image_index = 0; // keep track of the current image being viewed
-	
-	// Next line remarked as it is not used anywhere and hangs the page.
-	// current_pressed_keys = 0;
-    
+
     // // START : image details
     image_details = [];
     image_errors = [];
@@ -43,25 +40,26 @@ JSViewer = function () {
      *
      * @param {Y} Yui3 object
      * @param {total_number_images} the total number of images
-     * @return {null} 
+     * @return {null}
      */
     renderImage = function (Y, image_data) {
-		/*
-		This sets the image src to the image data and reposition the image arrows,
-		then focus on the konto field
-		*/
+        var image_detail, pos_top;
+        /*
+        This sets the image src to the image data and reposition the image arrows,
+        then focus on the konto field
+        */
         $('jsv_image').src = image_data.src;
         $('jsv_bilag').value = String(current_image_index + 1);
         $('jsv_konto').focus();
         $('jsv_link').href = image_data.src;
-        
+
         // // START : image details
         // var image_detail = image_details[current_image_index];
-        var image_detail = image_details[current_image_index + 1];
+        image_detail = image_details[current_image_index + 1];
         populateImageDetail(Y, image_detail);
         // // END : image details
 
-        var pos_top = Y.one('#jsv_image').get('height') - 200;
+        pos_top = Y.one('#jsv_image').get('height') - 200;
 
         pos_top += 'px';
         Y.one('#arrow_left').setStyle('bottom', pos_top);
@@ -70,185 +68,185 @@ JSViewer = function () {
 
     // // START : image details
     loadImageDetail = function (Y, imageID) {
-		// Skip loading from database if:
-		// 1) a save to db is in progress
-		// 2) image has validation errors
-		// 3) image does not exists i.e. pressing 'q' at the first image or 'w' at the last image
-		if (
-			( (typeof(restrict_db_update[imageID]) != "undefined") && (restrict_db_update[imageID] !== null) ) ||
-			( (typeof(image_errors[imageID]) != "undefined") && (image_errors[imageID] !== null) ) ||
-			imageID == 0 ||
-			imageID > my_image_count) {
-			log('skipping database loading of image id ' + imageID);
-			return;
-		}
+        // Skip loading from database if:
+        // 1) a save to db is in progress
+        if (restrict_db_update[imageID]) {
+            log('skipping database loading of image id ' + imageID);
+            return;
+        }
 
-		Y.io("get_image_detail.php", {  
-			method: 'POST',   
-			data : "image_id=" +  imageID,
-			// // ajax lifecycle event handlers  
-			on: {   
-				complete: function (id, response) {  
-					// var data = response.responseText; // Response data.  
-					var jsonObject = null;
-					
-					try {
-						jsonObject = Y.JSON.parse(response.responseText);
-						image_details[imageID] = jsonObject;
-					} catch(e) {
-					  log(e)
-					}
+        // 2) image has validation errors
+        if (image_errors[imageID]) {
+            log('skipping database loading of image id ' + imageID);
+            return;
+        }
+        // 3) image does not exists i.e. pressing 'q' at the first image or 'w' at the last image
+        if (imageID == 0 || imageID > my_image_count) {
+            log('skipping database loading of image id ' + imageID);
+            return;
+        }
 
-					// // Update fields too if the image is currently on display
-					if ((imageID == current_image_index + 1) && (jsonObject !== null)) {
-						populateImageDetail(Y, jsonObject);
-					}
-				}  
-			}  
-		});
+        Y.io("get_image_detail.php", {
+            method: 'POST',
+            data : "image_id=" +  imageID,
+            // // ajax lifecycle event handlers
+            on: {
+                complete: function (id, response) {
+                    // var data = response.responseText; // Response data.
+                    var jsonObject = null;
+
+                    try {
+                        jsonObject = Y.JSON.parse(response.responseText);
+                        image_details[imageID] = jsonObject;
+                    } catch (e) {
+                        log(e);
+                    }
+
+                    // // Update fields too if the image is currently on display
+                    if ((imageID == current_image_index + 1) && (jsonObject !== null)) {
+                        populateImageDetail(Y, jsonObject);
+                    }
+                }
+            }
+        });
     };
 
     populateImageDetail = function (Y, obj) {
-        if (obj === undefined || obj === null) {
-			$('jsv_date').value = '';
-			$('jsv_tekst').value = '';
-			$('jsv_belob').value = '';
-			$('jsv_konto').value = '';
-			$('jsv_modkonto').value = '';
-		} else {
-			$('jsv_date').value = obj['date'];
-			$('jsv_tekst').value = obj['tekst'];
-			$('jsv_belob').value = obj['belob'];
-			$('jsv_konto').value = obj['konto'];
-			$('jsv_modkonto').value = obj['modkonto'];
-		}
+        var image_id, errors;
+        $('jsv_date').value = '';
+        $('jsv_tekst').value = '';
+        $('jsv_belob').value = '';
+        $('jsv_konto').value = '';
+        $('jsv_modkonto').value = '';
+        if (obj) {
+            $('jsv_date').value = obj.date;
+            $('jsv_tekst').value = obj.tekst;
+            $('jsv_belob').value = obj.belob;
+            $('jsv_konto').value = obj.konto;
+            $('jsv_modkonto').value = obj.modkonto;
+        }
 
-		var image_id = current_image_index + 1;
-		if ( (typeof(image_errors[image_id]) != "undefined")
-			&& (image_errors[image_id] !== null) ) {
-			// Populate errors next to their respective fields
-			var errors = image_errors[image_id];
-			// log(errors['date']);
-			Y.one('#error_date').setHTML(errors['date']);
-			Y.one('#error_tekst').setHTML(errors['tekst']);
-			Y.one('#error_belob').setHTML(errors['belob']);
-			Y.one('#error_konto').setHTML(errors['konto']);
-			Y.one('#error_modkonto').setHTML(errors['modkonto']);
-		} else {
-			// Clear field errors from previous image
-			Y.all('span.field_error').setHTML('');
-		}
+        image_id = current_image_index + 1;
+        if (image_errors[image_id]) {
+            // Populate errors next to their respective fields
+            errors = image_errors[image_id];
+
+            Y.one('#error_date').setHTML(errors.date);
+            Y.one('#error_tekst').setHTML(errors.tekst);
+            Y.one('#error_belob').setHTML(errors.belob);
+            Y.one('#error_konto').setHTML(errors.konto);
+            Y.one('#error_modkonto').setHTML(errors.modkonto);
+        } else {
+            // Clear field errors from previous image
+            Y.all('span.field_error').setHTML('');
+        }
     };
-    
+
     saveImageDetail = function (Y, current_image_index) {
-		// Skip saving to database if:
-		// 1) image does not exists i.e. pressing 'w' at the last image
+        var ddate, image_id, tekst, belob, konto, modkonto, obj;
+
+        // Skip saving to database if:
+        // 1) image does not exists i.e. pressing 'w' at the last image
         if (current_image_index == my_image_count) {
-			return;
-		}
-		
-		var image_id = current_image_index + 1;
-		
-		// Get field values for obj
-		// var date = $('jsv_date').value;
-		var ddate = $('jsv_date').value;
-		var tekst = $('jsv_tekst').value;
-		var belob = $('jsv_belob').value;
-		var konto = $('jsv_konto').value;
-		var modkonto = $('jsv_modkonto').value;
+            return;
+        }
 
-		// Get obj in RAM
-		var obj = image_details[image_id];
-		
-		// Abort silently if there is no obj
-        // if (obj === undefined || obj === null) { return; }
-		if ( (typeof(obj) == "undefined") || (obj === null) ) { return; }
-		
-		// If there is a difference between the object in RAM 
-		// and the field values, save object.
-		// NOTE : "undefined" is not the same as an empty string :)
-		if (
-			// obj['date'] == date &&
-			obj['date'] == ddate &&
-			obj['tekst'] == tekst &&
-			obj['belob'] == belob &&
-			obj['konto'] == konto &&
-			obj['modkonto'] == modkonto
-			) {
-				
-			log('no need to save ' + image_id);
-			
-		} else {
+        image_id = current_image_index + 1;
 
-			// Update object in RAM
-			obj['date'] = ddate;
-			obj['tekst'] = tekst;
-			obj['belob'] = belob;
-			obj['konto'] = konto;
-			obj['modkonto'] = modkonto;
-			image_details[image_id] = obj;
-			
-			Y.io("set_image_detail.php", {  
-				// // this is a post  
-				method: 'POST',   
-				// // serialize the form. keeps bugging out ...  
-				// form: {   
-				//	id: imageID,  
-				// }, 
-				data : "image_id=" +  image_id 
-					// + "&date=" + date
-					+ "&date=" + ddate
-					+ "&tekst=" + tekst
-					+ "&belob=" + belob
-					+ "&konto=" + konto
-					+ "&modkonto=" + modkonto,
-				// // ajax lifecycle event handlers  
-				on: {   
-					start: function (id) {
-						log('saving ' + image_id + ' ...');
+        // Get field values for obj
+        // var date = $('jsv_date').value;
+        ddate = $('jsv_date').value;
+        tekst = $('jsv_tekst').value;
+        belob = $('jsv_belob').value;
+        konto = $('jsv_konto').value;
+        modkonto = $('jsv_modkonto').value;
 
-						// Prevent other threads from overwriting the user's
-						// typed in values while the request is in progress.
-						restrict_db_update[image_id] = true;
-					},
-					complete: function (id, response) {  
-						var jsonObject = Y.JSON.parse(response.responseText);
-						
-						log(image_id + ' saved');
-						log(jsonObject);
-						
-						if (jsonObject['status'] == 0) {
-							image_errors[image_id] = jsonObject['errors'];
-						}
-						
-						if (jsonObject['status'] == 1) {
-							/*
-							// Update object in RAM
-							obj['date'] = ddate;
-							obj['tekst'] = tekst;
-							obj['belob'] = belob;
-							obj['konto'] = konto;
-							obj['modkonto'] = modkonto;
-							image_details[image_id] = obj;
+        // Get obj in RAM
+        obj = image_details[image_id];
 
-							// // Update fields too if the image is currently on display
-							if (image_id == current_image_index + 1) {
-								populateImageDetail(Y, obj);
-							}
-							*/
-							
-							// Remove its errors
-							delete image_errors[image_id];
-							
-							// Remove update restriction
-							delete restrict_db_update[image_id];
-						}
-					}  
-				}  
-			});
+        // Abort silently if there is no obj
+        if (!obj) {
+            return;
+        }
 
-		}
-	};
+        // If there is a difference between the object in RAM
+        // and the field values, save object.
+        // NOTE : "undefined" is not the same as an empty string :)
+        if (obj.date == ddate && obj.tekst == tekst && obj.belob == belob && obj.konto == konto && obj.modkonto == modkonto) {
+
+            log('no need to save ' + image_id);
+
+        } else {
+
+            // Update object in RAM
+            obj.date = ddate;
+            obj.tekst = tekst;
+            obj.belob = belob;
+            obj.konto = konto;
+            obj.modkonto = modkonto;
+            image_details[image_id] = obj;
+
+            Y.io("set_image_detail.php", {
+                // // this is a post
+                method: 'POST',
+                // // serialize the form. keeps bugging out ...
+                // form: {
+                //    id: imageID,
+                // },
+                data : "image_id=" +  image_id
+                    // + "&date=" + date
+                    + "&date=" + ddate
+                    + "&tekst=" + tekst
+                    + "&belob=" + belob
+                    + "&konto=" + konto
+                    + "&modkonto=" + modkonto,
+                // // ajax lifecycle event handlers
+                on: {
+                    start: function (id) {
+                        log('saving ' + image_id + ' ...');
+
+                        // Prevent other threads from overwriting the user's
+                        // typed in values while the request is in progress.
+                        restrict_db_update[image_id] = true;
+                    },
+                    complete: function (id, response) {
+                        var jsonObject = Y.JSON.parse(response.responseText);
+    
+                        log(image_id + ' saved');
+                        log(jsonObject);
+    
+                        if (jsonObject['status'] == 0) {
+                            image_errors[image_id] = jsonObject['errors'];
+                        }
+    
+                        if (jsonObject['status'] == 1) {
+                            /*
+                            // Update object in RAM
+                            obj['date'] = ddate;
+                            obj['tekst'] = tekst;
+                            obj['belob'] = belob;
+                            obj['konto'] = konto;
+                            obj['modkonto'] = modkonto;
+                            image_details[image_id] = obj;
+
+                            // // Update fields too if the image is currently on display
+                            if (image_id == current_image_index + 1) {
+                                populateImageDetail(Y, obj);
+                            }
+                            */
+        
+                            // Remove its errors
+                            delete image_errors[image_id];
+        
+                            // Remove update restriction
+                            delete restrict_db_update[image_id];
+                        }
+                    }
+                }
+            });
+
+        }
+    };
     // // END : image details
 
     log = function (m) {
@@ -264,18 +262,18 @@ JSViewer = function () {
      * @param {total_number_images} the total number of images
      * @param {POST_CACHE} this is the number of images to render before we start caching again
      * @param {PRE_CACHE} this is the number of images to cached at a time
-     * @return {null} 
+     * @return {null}
      */
     showPrevImage = function (Y, total_number_images, POST_CACHE, PRE_CACHE) {
         return function (e) {
             if (e) {
                 e.stopPropagation();
             }
-            
-			// // START : image details
+
+            // // START : image details
             saveImageDetail(Y, current_image_index + 0);
-			// // END : image details
-            
+            // // END : image details
+
             if (current_image_index > 0) {
                 current_image_index--;
             }
@@ -287,9 +285,9 @@ JSViewer = function () {
             }
 
             try {
-              renderImage(Y, images[current_image_index]);
+                renderImage(Y, images[current_image_index]);
             } catch(e) {
-              log(e)
+                log(e)
             }
         };
     };
@@ -301,18 +299,18 @@ JSViewer = function () {
      * @param {total_number_images} the total number of images
      * @param {POST_CACHE} this is the number of images to render before we start caching again
      * @param {PRE_CACHE} this is the number of images to cached at a time
-     * @return {null} 
+     * @return {null}
      */
     showNextImage = function (Y, total_number_images, POST_CACHE, PRE_CACHE) {
         return function (e) {
             if (e) {
                 e.stopPropagation();
             }
-            
-			// // START : image details
-			saveImageDetail(Y, current_image_index + 0);
-			// // END : image details
-			
+
+            // // START : image details
+            saveImageDetail(Y, current_image_index + 0);
+            // // END : image details
+
             if ((current_image_index+1) < total_number_images) {
                 current_image_index++;
             }
@@ -332,7 +330,7 @@ JSViewer = function () {
      * @param {total_number_images} the total number of images
      * @param {POST_CACHE} this is the number of images to render before we start caching again
      * @param {PRE_CACHE} this is the number of images to cached at a time
-     * @return {null} 
+     * @return {null}
      */
     keyDownHandler = function (Y, total_number_images, POST_CACHE, PRE_CACHE) {
         return function (e) {
@@ -351,14 +349,14 @@ JSViewer = function () {
     };
 
     /**
-* Handles a keyup event
-*
-* @param {Y} Yui3 object
-* @param {total_number_images} the total number of images
-* @param {POST_CACHE} this is the number of images to render before we start caching again
-* @param {PRE_CACHE} this is the number of images to cached at a time
-* @return {null}
-*/
+     * Handles a keyup event
+     *
+     * @param {Y} Yui3 object
+     * @param {total_number_images} the total number of images
+     * @param {POST_CACHE} this is the number of images to render before we start caching again
+     * @param {PRE_CACHE} this is the number of images to cached at a time
+     * @return {null}
+     */
     keyUpHandler = function (Y, total_number_images, POST_CACHE, PRE_CACHE) {
         return function (e) {
             e.preventDefault();
@@ -371,23 +369,23 @@ JSViewer = function () {
             }
 
             /*switch (e.keyCode) {
-case 65:
-current_image_index++;
-renderImage(Y, total_number_images, localStorage.getItem('img-' + current_image_index));
-break;
-}*/
+            case 65:
+            current_image_index++;
+            renderImage(Y, total_number_images, localStorage.getItem('img-' + current_image_index));
+            break;
+            }*/
         };
     };
 
     /**
-* Initialize the keyboard handlers
-*
-* @param {Y} Yui3 object
-* @param {total_number_images} the total number of images
-* @param {POST_CACHE} this is the number of images to render before we start caching again
-* @param {PRE_CACHE} this is the number of images to cached at a time
-* @return {null}
-*/
+     * Initialize the keyboard handlers
+     *
+     * @param {Y} Yui3 object
+     * @param {total_number_images} the total number of images
+     * @param {POST_CACHE} this is the number of images to render before we start caching again
+     * @param {PRE_CACHE} this is the number of images to cached at a time
+     * @return {null}
+     */
     setKeyboardHandlers = function (Y, total_number_images, POST_CACHE, PRE_CACHE) {
         Y.one('doc').on("key", keyDownHandler(Y, total_number_images, POST_CACHE, PRE_CACHE), 'enter,81,87');
         Y.one('doc').on("keyup", keyUpHandler(Y, total_number_images, POST_CACHE, PRE_CACHE));
@@ -398,7 +396,7 @@ break;
      *
      * @param {Y} Yui3 object
      * @param {show} if true, show the arrow, otherwise, hide them
-     * @return {null} 
+     * @return {null}
      */
     toggleArrows = function (Y, show) {
         return function (e) {
@@ -413,7 +411,7 @@ break;
      * @param {Y} Yui3 object
      * @param {POST_CACHE} this is the number of images to render before we start caching again
      * @param {PRE_CACHE} this is the number of images to cached at a time
-     * @return {null} 
+     * @return {null}
      */
     addArrows = function (Y, total_number_images, POST_CACHE, PRE_CACHE) {
         var pos_top, arrowLeft, arrowRight;
@@ -453,7 +451,7 @@ break;
      * @param {total_number_images} the total number of images
      * @param {POST_CACHE} this is the number of images to render before we start caching again
      * @param {PRE_CACHE} this is the number of images to cached at a time
-     * @return {null} 
+     * @return {null}
      */
     loadImage = function (Y, imageID) {
         var i = new Image()
@@ -475,7 +473,7 @@ break;
      * @param {total_number_images} the total number of images
      * @param {POST_CACHE} this is the number of images to render before we start caching again
      * @param {PRE_CACHE} this is the number of images to cached at a time
-     * @return {null} 
+     * @return {null}
      */
     cacheGroup = function (Y, from, PRE_CACHE) {
         var i = 0, n;
@@ -501,7 +499,7 @@ break;
          * @param {total_number_images} the total number of images
          * @param {POST_CACHE} this is the number of images to render before we start caching again
          * @param {PRE_CACHE} this is the number of images to cached at a time
-         * @return {null} 
+         * @return {null}
          */
         start : function (total_number_images, POST_CACHE, PRE_CACHE, from, key_codes) {
 
