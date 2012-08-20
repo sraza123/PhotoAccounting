@@ -44,6 +44,11 @@ JSViewer = function () {
      */
     renderImage = function (Y, image_data) {
         var image_detail, pos_top;
+
+        if (!image_data.src) {
+            throw "Invalid argument";
+        }
+
         /*
         This sets the image src to the image data and reposition the image arrows,
         then focus on the konto field
@@ -368,17 +373,9 @@ JSViewer = function () {
 
             var valas = my_key_codes[String.fromCharCode(e.keyCode).toLowerCase()];
 
-            if (valas != undefined) {
-                current_image_index++;
-                renderImage(Y, total_number_images, localStorage.getItem('img-' + current_image_index));
+            if (valas) {
+                showNextImage(Y, total_number_images, POST_CACHE, PRE_CACHE)(e);
             }
-
-            /*switch (e.keyCode) {
-            case 65:
-            current_image_index++;
-            renderImage(Y, total_number_images, localStorage.getItem('img-' + current_image_index));
-            break;
-            }*/
         };
     };
 
