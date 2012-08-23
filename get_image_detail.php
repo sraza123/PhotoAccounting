@@ -3,12 +3,12 @@
 
 // Abort early if there is nothing to process
 if (!isset($_POST['image_id'])) { 
-	header("HTTP/1.1 500 Server error")
+	header("HTTP/1.1 500 Server error");
 	die("Invalid request");
 }
 
 if ($_POST['image_id'] < 0) {
-	header("HTTP/1.1 404 Not Found")
+	header("HTTP/1.1 404 Not Found");
 	die("Invalid request");
 }
 
