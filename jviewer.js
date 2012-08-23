@@ -94,7 +94,7 @@ JSViewer = function () {
             return;
         }
 
-        Y.io("get_image_detail.php", {
+        Y.io("php/get_image_detail.php", {
             method: 'POST',
             data : "image_id=" +  imageID,
             // // ajax lifecycle event handlers
@@ -196,7 +196,7 @@ JSViewer = function () {
             obj.modkonto = modkonto;
             image_details[image_id] = obj;
 
-            Y.io("set_image_detail.php", {
+            Y.io("php/set_image_detail.php", {
                 // // this is a post
                 method: 'POST',
                 // // serialize the form. keeps bugging out ...
