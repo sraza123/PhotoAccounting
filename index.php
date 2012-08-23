@@ -79,7 +79,7 @@ $files = getImagesInDir('images');
 <html lang="en">
 <head>
    <meta charset="utf8"/>
-   <link rel="stylesheet" type="text/css" href="jviewer.css">
+   <link rel="stylesheet" type="text/css" href="css/jviewer.css">
    <script src="gsdom.js"></script>
    <script src="jviewer.js"></script>
    <script src="http://yui.yahooapis.com/3.5.1/build/yui/yui-min.js"></script>
