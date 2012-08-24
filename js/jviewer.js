@@ -53,7 +53,7 @@ JSViewer = function () {
         This sets the image src to the image data and reposition the image arrows,
         then focus on the konto field
         */
-        $('jsv_image').src = 'loading_gif.gif';
+        $('jsv_image').src = 'loading.gif';
         $('jsv_image').src = image_data.src;
         $('jsv_image').style.maxWidth = "100%";
         $('jsv_image').style.maxHeight = "100%";
@@ -94,7 +94,7 @@ JSViewer = function () {
             return;
         }
 
-        Y.io("get_image_detail.php", {
+        Y.io("php/get_image_detail.php", {
             method: 'POST',
             data : "image_id=" +  imageID,
             // // ajax lifecycle event handlers
@@ -196,7 +196,7 @@ JSViewer = function () {
             obj.modkonto = modkonto;
             image_details[image_id] = obj;
 
-            Y.io("set_image_detail.php", {
+            Y.io("php/set_image_detail.php", {
                 // // this is a post
                 method: 'POST',
                 // // serialize the form. keeps bugging out ...
