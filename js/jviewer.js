@@ -88,6 +88,7 @@ JSViewer = function () {
             log('skipping database loading of image id ' + imageID);
             return;
         }
+        
         // 3) image does not exists i.e. pressing 'q' at the first image or 'w' at the last image
         if (imageID < 0 || imageID > my_image_count) {
             log('skipping database loading of image id ' + imageID);
@@ -251,6 +252,19 @@ JSViewer = function () {
                             // Remove update restriction
                             delete restrict_db_update[image_id];
                         }
+
+						// // Update the flash_errors div to notify
+						// // users that there is/are error(s)
+						var errorCount = 0, i = image_errors.length;
+						while (i--) {
+							if (typeof image_errors[i] !== 'undefined')
+								errorCount++;
+						}
+						var errorString = '';
+						if (errorCount > 0) {
+							errorString = errorCount + (errorCount > 1 ? ' errors ' : ' error ') + 'found';
+						}
+						Y.one('#flash_errors').setHTML(errorString);
                     }
                 }
             });
