@@ -110,10 +110,11 @@ $('jsv_konto').blur();
 <body>
 
 <article id="jsv_left">
-  <div id="log"></div>
-  <div id="log2"></div>
+	<div id="log"></div>
+	<div id="log2"></div>
 </article>
 <article id="jsv_right">
+	<div id="flash_errors"></div>
    <form id="jsv_form">
        <ul>
            <li>
