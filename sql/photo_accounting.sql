@@ -36,4 +36,4 @@ INSERT INTO entries (customer_id, entry_id, image_id, entry_date, text, amount, 
 INSERT INTO entries (customer_id, entry_id, image_id, entry_date, text, amount, account, offset_account) VALUES (26,26,26,'2012-08-14','TEST 26',26,26,26);
 INSERT INTO entries (customer_id, entry_id, image_id, entry_date, text, amount, account, offset_account) VALUES (27,27,27,'2012-08-14','TEST 27',27,27,27); 
 
-SELECT * FROM entries ORDER BY image_id;
+-- SELECT * FROM entries ORDER BY image_id;
