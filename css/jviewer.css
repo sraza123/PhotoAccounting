@@ -45,3 +45,10 @@ span.field_error{
 	color:red;
 	font-size:small;
 }
+
+div#flash_errors {
+	height:30px;
+	padding-top:3px;
+	padding-bottom:3px;
+	color:#FF2211;
+}
