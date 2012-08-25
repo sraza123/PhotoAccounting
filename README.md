@@ -4,6 +4,7 @@ PhotoAccounting
 Copyright � 2012 Time at Task Aps. All rights reserved. 
 
 
+One reasonably updated version of this repository is running at: http://images.ebogholderen.dk/test2/PhotoAccounting/index.php
 
 
 Background information about the PhotoAccounting module
