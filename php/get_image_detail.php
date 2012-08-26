@@ -52,10 +52,10 @@ while ($row = pg_fetch_assoc($result)) {
 		$detail->date = date('d-m-Y', $timestamp); 
 	}
 
-	$detail->tekst = $row['text'];
-	$detail->belob = $row['amount'];
-	$detail->konto = $row['account'];
-	$detail->modkonto = $row['offset_account'];
+	$detail->text = $row['text'];
+	$detail->amount = $row['amount'];
+	$detail->account = $row['account'];
+	$detail->offset_account = $row['offset_account'];
 }
 
 // Free resultset

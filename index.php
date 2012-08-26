@@ -96,9 +96,9 @@ my_codes['x'] = 'xxxx';
 document.onkeydown=function(e){
 var valas = my_codes[String.fromCharCode(e.which).toLowerCase()];
 if(valas != undefined) {
-$('jsv_konto').value = valas;
+$('jsv_account').value = valas;
 //comment out the next line if you want the cursor to stay in the field.
-$('jsv_konto').blur();
+$('jsv_account').blur();
 }
 }
   JSViewer.start(<?php echo count($files); ?>, <?php echo POST_CACHE; ?>, <?php echo PRE_CACHE; ?>, <?php echo isset($_GET['imageID'])?$_GET['imageID']:0; ?>,my_codes);
@@ -118,28 +118,28 @@ $('jsv_konto').blur();
    <form id="jsv_form">
        <ul>
            <li>
-                <label for="jsv_bilag">Bilag</label>
-                <div><input type="text" name="jsv_bilag" id="jsv_bilag" value="1" size="10"/><span id="error_bilag" class="field_error"></span></div>
+                <label for="jsv_enclosure_number">Enclosure Number</label>
+                <div><input type="text" name="jsv_enclosure_number" id="jsv_enclosure_number" value="1" size="10"/><span id="error_enclosure_number" class="field_error"></span></div>
            </li>
            <li>
-                <label for="jsv_modkonto">Modkonto</label>
-                <div><input type="text" name="jsv_modkonto" id="jsv_modkonto" size="10"/><span id="error_modkonto" class="field_error"></span></div>
+                <label for="jsv_offset_account">Offset Account</label>
+                <div><input type="text" name="jsv_offset_account" id="jsv_offset_account" size="10"/><span id="error_offset_account" class="field_error"></span></div>
            </li>
            <li>
                 <label for="jsv_date">Date</label>
                 <div><input type="text" name="jsv_date" id="jsv_date" size="10"/><span id="error_date" class="field_error"></span></div>
            </li>
            <li>
-                <label for="jsv_konto">Konto</label>
-                <div><input type="text" name="jsv_konto" id="jsv_konto" size="10"/><span id="error_konto" class="field_error"></span></div>
+                <label for="jsv_account">Account</label>
+                <div><input type="text" name="jsv_account" id="jsv_account" size="10"/><span id="error_account" class="field_error"></span></div>
            </li>
            <li>
-                <label for="jsv_belob">Bel&oslash;b</label>
-                <div><input type="text" name="jsv_belob" id="jsv_belob" size="10"/><span id="error_belob" class="field_error"></span></div>
+                <label for="jsv_amount">amount</label>
+                <div><input type="text" name="jsv_amount" id="jsv_amount" size="10"/><span id="error_amount" class="field_error"></span></div>
            </li>
            <li>
-                <label for="jsv_tekst">Tekst</label>
-                <div><textarea name="jsv_tekst" id="jsv_tekst" cols="41"></textarea><br/><span id="error_tekst" class="field_error"></span></div>
+                <label for="jsv_text">Text</label>
+                <div><textarea name="jsv_text" id="jsv_text" cols="41"></textarea><br/><span id="error_text" class="field_error"></span></div>
            </li>
        </ul>
    </form>

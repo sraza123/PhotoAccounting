@@ -9,10 +9,10 @@ include_once "includes/db.php";
 // Extract request parameters trimming spaces as well
 $image_id = trim($_POST['image_id']);
 $entry_date = trim($_POST['date']);
-$text = trim($_POST['tekst']);
-$amount = trim($_POST['belob']);
-$account = trim($_POST['konto']);
-$offset_account = trim($_POST['modkonto']);
+$text = trim($_POST['text']);
+$amount = trim($_POST['amount']);
+$account = trim($_POST['account']);
+$offset_account = trim($_POST['offset_account']);
 
 // START : validation
 // Store errors in this array using keys similar to that on the page
